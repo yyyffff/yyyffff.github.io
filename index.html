@@ -250,7 +250,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2025/01/22/%E6%A0%88%E6%BA%A2%E5%87%BA/" target="_self">
         <div>
-          原理原理： 利用危险函数，将返回地址填充到栈帧上的返回地址，从控制该函数结束时返回到的地方 危险函数初级栈溢出ret2text利用.text段中的代码 确定填充长度后   构造payload即可 例子ret2shellcoderet2syscallret2libc
+          原理原理： 利用危险函数，将返回地址填充到栈帧上的返回地址，从控制该函数结束时返回到的地方 危险函数 输入 gets，直接读取一行，忽略’\x00’ scanf vscanf   输出 sprintf   字符串 strcpy，字符串复制，遇到’\x00’停止 strcat，字符串拼接，遇到’\x00’停止 bcopy    初级栈溢出ret2text利用.text段中的代码 确定填充长度后
         </div>
       </a>
 
