@@ -4,6 +4,25 @@
   
   
   <entry>
+    <title>栈溢出</title>
+    <link href="/2025/01/22/%E6%A0%88%E6%BA%A2%E5%87%BA/"/>
+    <url>/2025/01/22/%E6%A0%88%E6%BA%A2%E5%87%BA/</url>
+    
+    <content type="html"><![CDATA[<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>原理： 利用危险函数，将返回地址填充到栈帧上的返回地址，从<strong>控制该函数结束时返回到的地方</strong></p><h2 id="危险函数"><a href="#危险函数" class="headerlink" title="危险函数"></a>危险函数</h2><h1 id="初级栈溢出"><a href="#初级栈溢出" class="headerlink" title="初级栈溢出"></a>初级栈溢出</h1><h2 id="ret2text"><a href="#ret2text" class="headerlink" title="ret2text"></a>ret2text</h2><p>利用<code>.text</code>段中的代码</p><p>确定填充长度后   构造payload即可</p><h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><h2 id="ret2shellcode"><a href="#ret2shellcode" class="headerlink" title="ret2shellcode"></a>ret2shellcode</h2><h2 id="ret2syscall"><a href="#ret2syscall" class="headerlink" title="ret2syscall"></a>ret2syscall</h2><h2 id="ret2libc"><a href="#ret2libc" class="headerlink" title="ret2libc"></a>ret2libc</h2>]]></content>
+    
+    
+    <categories>
+      
+      <category>2025冬令营</category>
+      
+    </categories>
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>备注</title>
     <link href="/2025/01/18/%E5%A4%87%E6%B3%A8/"/>
     <url>/2025/01/18/%E5%A4%87%E6%B3%A8/</url>
