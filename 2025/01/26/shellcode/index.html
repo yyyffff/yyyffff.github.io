@@ -1,0 +1,762 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/128.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yyf">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="shellcode原理 就是一段可以插入到程序或系统中并被执行的代码，shellcode的作用就是getshell  编写64位 1234567mov rax,mov rax, 0x68732f6e69622f ;这里后面那一大串是&#x2F;bin&#x2F;shpush raxmov rdi,rsp    ;这两行使rdi指向&#x2F;bin&#x2F;shmov esi,0mov edo,0mov rax,0x3bint 0x8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shellcode">
+<meta property="og:url" content="http://yyyffff.github.io/2025/01/26/shellcode/index.html">
+<meta property="og:site_name" content="yyyffff">
+<meta property="og:description" content="shellcode原理 就是一段可以插入到程序或系统中并被执行的代码，shellcode的作用就是getshell  编写64位 1234567mov rax,mov rax, 0x68732f6e69622f ;这里后面那一大串是&#x2F;bin&#x2F;shpush raxmov rdi,rsp    ;这两行使rdi指向&#x2F;bin&#x2F;shmov esi,0mov edo,0mov rax,0x3bint 0x8">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/llcode/1737913055216.png">
+<meta property="article:published_time" content="2025-01-26T08:00:28.000Z">
+<meta property="article:modified_time" content="2025-01-26T17:40:04.984Z">
+<meta property="article:author" content="yyf">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/llcode/1737913055216.png">
+  
+  
+  
+  <title>shellcode - yyyffff</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yyyffff.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":"2bkS2AvQTqNk4TIsyxh4ew9q-gzGzoHsz","app_key":"GfRH0zMaM1USTNT6w25DTqu8","server_url":"https://2bks2avq.lc-cn-n1-shared.com","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>yyyffff</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="shellcode"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-01-26 16:00" pubdate>
+          2025年1月26日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          877 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          8 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">shellcode</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><ul>
+<li>就是一段可以插入到程序或系统中并被执行的代码，shellcode的作用就是getshell</li>
+</ul>
+<h2 id="编写"><a href="#编写" class="headerlink" title="编写"></a>编写</h2><p>64位</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs assembly">mov rax,mov rax, 0x68732f6e69622f ;这里后面那一大串是/bin/sh<br>push rax<br>mov rdi,rsp    ;这两行使rdi指向/bin/sh<br>mov esi,0<br>mov edo,0<br>mov rax,0x3b<br>int 0x80<br></code></pre></td></tr></table></figure>
+
+<h2 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h2><ol>
+<li><p>将shellcode转换位机器码</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">nasm -f <span class="hljs-keyword">bin </span>-o <span class="hljs-keyword">shellcode.bin </span><span class="hljs-keyword">shellcode.asm</span><br></code></pre></td></tr></table></figure>
+</li>
+<li><p>转换为16进制字符串</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css">xxd -<span class="hljs-selector-tag">p</span> shellcode<span class="hljs-selector-class">.bin</span><br></code></pre></td></tr></table></figure>
+
+<p>假设输出为 48b82f62696e2f7368504889e731f631d26a3b580f05 </p>
+<p>那么写的脚本中</p>
+<p><code>shellcode = b&#39;\x48\xb8\x2f\x62\x69\x6e\x2f\x73\x68\x50\x48\x89\xe7\x31\xf6\x31\xd2\x6a\x3b\x58\x0f\x05&#39;</code></p>
+</li>
+</ol>
+<h1 id="沙盒下的orw绕过"><a href="#沙盒下的orw绕过" class="headerlink" title="沙盒下的orw绕过"></a>沙盒下的orw绕过</h1><h2 id="沙箱保护"><a href="#沙箱保护" class="headerlink" title="沙箱保护"></a>沙箱保护</h2><ul>
+<li>对程序加入的一些保护，最常见的是禁用一些系统调用，比如exceve，使我们不可通过系统调用获取到权限，因此只能通过<strong>ROP的方式调用open,read,write</strong>等来读取并打印flag内同</li>
+</ul>
+<h2 id="ORW"><a href="#ORW" class="headerlink" title="ORW"></a>ORW</h2><p>就是open, read,write简写，就是打开，写入，输出flag</p>
+<h2 id="查看沙箱"><a href="#查看沙箱" class="headerlink" title="查看沙箱"></a>查看沙箱</h2><p>利用seccomp-tools查看是否开启了沙箱，以及沙箱中一些允许的syscall</p>
+<p>安装：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cmake">sudo apt <span class="hljs-keyword">install</span> gcc ruby-dev<br>gem <span class="hljs-keyword">install</span> seccomp-tools<br></code></pre></td></tr></table></figure>
+
+<p>检查：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">seccomp-tools dump ./pwn<br></code></pre></td></tr></table></figure>
+
+<h2 id="开启沙箱"><a href="#开启沙箱" class="headerlink" title="开启沙箱"></a>开启沙箱</h2><h3 id="prctl-函数调用"><a href="#prctl-函数调用" class="headerlink" title="prctl()函数调用"></a>prctl()函数调用</h3><ul>
+<li><p>原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;sys/prctl.h&gt;</span></span><br><span class="hljs-type">int</span> <span class="hljs-title function_">prctl</span><span class="hljs-params">(<span class="hljs-type">int</span> option, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> arg2, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> arg3, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> arg4, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> arg5)</span>;<br><br><span class="hljs-comment">// 主要关注prctl()函数的第一个参数，也就是option,设定的option的值的不同导致黑名单不同，介绍2个比较重要的option</span><br><span class="hljs-comment">// PR_SET_NO_NEW_PRIVS(38) 和 PR_SET_SECCOMP(22)</span><br><br><span class="hljs-comment">// option为38的情况</span><br><span class="hljs-comment">// 此时第二个参数设置为1，则 禁用execve系统调用 且子进程一样受用</span><br>prctl(<span class="hljs-number">38</span>, <span class="hljs-number">1LL</span>, <span class="hljs-number">0LL</span>, <span class="hljs-number">0LL</span>, <span class="hljs-number">0LL</span>);<br><br><span class="hljs-comment">// option为22的情况</span><br><span class="hljs-comment">// 此时第二个参数为1，只允许调用read/write/_exit(not exit_group)/sigreturn这几个syscall</span><br><span class="hljs-comment">// 第二个参数为2，则为过滤模式，其中对syscall的限制通过参数3的结构体来自定义过滤规则。</span><br>prctl(<span class="hljs-number">22</span>, <span class="hljs-number">2LL</span>, &amp;v1);<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="seccomp-系统调用"><a href="#seccomp-系统调用" class="headerlink" title="seccomp()系统调用"></a>seccomp()系统调用</h3><ul>
+<li><p>原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs c">__int64 <span class="hljs-title function_">sandbox</span><span class="hljs-params">()</span><br>&#123;<br>  __int64 v1; <span class="hljs-comment">// [rsp+8h] [rbp-8h]</span><br><br>  <span class="hljs-comment">// 这里介绍两个重要的宏，SCMP_ACT_ALLOW(0x7fff0000U) SCMP_ACT_KILL( 0x00000000U)</span><br>  <span class="hljs-comment">// seccomp初始化，参数为0表示白名单模式，参数为0x7fff0000U则为黑名单模式</span><br>  v1 = seccomp_init(<span class="hljs-number">0LL</span>);<br>  <span class="hljs-keyword">if</span> ( !v1 )<br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;seccomp error&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>  &#125;<br><br>  <span class="hljs-comment">// seccomp_rule_add添加规则</span><br>  <span class="hljs-comment">// v1对应上面初始化的返回值</span><br>  <span class="hljs-comment">// 0x7fff0000即对应宏SCMP_ACT_ALLOW</span><br>  <span class="hljs-comment">// 第三个参数代表对应的系统调用号，0--&gt;read/1--&gt;write/2--&gt;open/60--&gt;exit</span><br>  <span class="hljs-comment">// 第四个参数表示是否需要对对应系统调用的参数做出限制以及指示做出限制的个数，传0不做任何限制</span><br>  seccomp_rule_add(v1, <span class="hljs-number">0x7FFF0000L</span>L, <span class="hljs-number">2LL</span>, <span class="hljs-number">0LL</span>);<br>  seccomp_rule_add(v1, <span class="hljs-number">0x7FFF0000L</span>L, <span class="hljs-number">0LL</span>, <span class="hljs-number">0LL</span>);<br>  seccomp_rule_add(v1, <span class="hljs-number">0x7FFF0000L</span>L, <span class="hljs-number">1LL</span>, <span class="hljs-number">0LL</span>);<br>  seccomp_rule_add(v1, <span class="hljs-number">0x7FFF0000L</span>L, <span class="hljs-number">60LL</span>, <span class="hljs-number">0LL</span>);<br>  seccomp_rule_add(v1, <span class="hljs-number">0x7FFF0000L</span>L, <span class="hljs-number">231LL</span>, <span class="hljs-number">0LL</span>);<br><br>  <span class="hljs-comment">// seccomp_load-&gt;将当前seccomp过滤器加载到内核中</span><br>  <span class="hljs-keyword">if</span> ( seccomp_load(v1) &lt; <span class="hljs-number">0</span> )<br>  &#123;<br>    <span class="hljs-comment">// seccomp_release-&gt;释放seccomp过滤器状态</span><br>    <span class="hljs-comment">// 但对已经load的过滤规则不影响</span><br>    seccomp_release(v1);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;seccomp error&quot;</span>);<br>    <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>  &#125;<br>  <span class="hljs-keyword">return</span> seccomp_release(v1);<br>&#125;<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="shellcode的写入"><a href="#shellcode的写入" class="headerlink" title="shellcode的写入"></a>shellcode的写入</h2><p>一般溢出的大小不够写入很长的ROP链，因此提供mmap()函数，从而给出一段栈上的内存</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> *<span class="hljs-title function_">mmap</span><span class="hljs-params">(<span class="hljs-type">void</span> *start,<span class="hljs-type">size_t</span> length,<span class="hljs-type">int</span> prot,<span class="hljs-type">int</span> flags,<span class="hljs-type">int</span> fd,<span class="hljs-type">off_t</span> offsize)</span>; <br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> *mmap&#123;<br>    <span class="hljs-type">void</span> *addr; <span class="hljs-comment">//映射区首地址，传NULL</span><br>    <span class="hljs-type">size_t</span> length; <span class="hljs-comment">//映射区大小</span><br>    <span class="hljs-comment">//会自动调为4k的整数倍</span><br>    <span class="hljs-comment">//不能为0</span><br>    <span class="hljs-comment">//一般文件多大，length就指定多大</span><br>    <span class="hljs-type">int</span> prot; <span class="hljs-comment">//映射区权限</span><br>    <span class="hljs-comment">//PROT_READ 映射区必须要有读权限</span><br>    <span class="hljs-comment">//PROT_WRITE</span><br>    <span class="hljs-comment">//PROT_READ | PROT_WRITE</span><br>    <span class="hljs-type">int</span> flags; <span class="hljs-comment">//标志位参数</span><br>    <span class="hljs-comment">//MAP_SHARED 修改内存数据会同步到磁盘</span><br>    <span class="hljs-comment">//MAP_PRIVATE 修改内存数据不会同步到磁盘</span><br>    <span class="hljs-type">int</span> fd; <span class="hljs-comment">//要映射文件所对应的文件描述符</span><br>    <span class="hljs-type">off_t</span> offset; <span class="hljs-comment">//映射文件的偏移量，从文件哪个位置开始</span><br>    <span class="hljs-comment">//映射的时候文件指针的偏移量</span><br>    <span class="hljs-comment">//必须是4k的整数倍</span><br>    <span class="hljs-comment">//一般设为0</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/llcode/1737913055216.png" srcset="/img/loading.gif" lazyload alt="1737913055216"></p>
+<p>orw绕过就是open flag，将flag写入某个区域，再write出来</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/2025%E5%86%AC%E4%BB%A4%E8%90%A5/" class="category-chain-item">2025冬令营</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>shellcode</div>
+      <div>http://yyyffff.github.io/2025/01/26/shellcode/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yyf</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年1月26日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/01/22/%E6%A0%88%E6%BA%A2%E5%87%BA/" title="栈溢出">
+                        <span class="hidden-mobile">栈溢出</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"2bkS2AvQTqNk4TIsyxh4ew9q-gzGzoHsz","appKey":"GfRH0zMaM1USTNT6w25DTqu8","path":"window.location.pathname","placeholder":"说点什么","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
