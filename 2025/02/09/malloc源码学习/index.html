@@ -37,8 +37,23 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739271421329.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739271511827.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739272311840.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739551424330.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739610043953.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739610064636.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739639876879.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739639913107.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739639928725.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739689213477.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739689225241.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739699575792.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739699606500.png">
+<meta property="og:image" content="http://yyyffff.github.io/1739718475251.png">
+<meta property="og:image" content="http://yyyffff.github.io/1739718784433.png">
+<meta property="og:image" content="http://yyyffff.github.io/1739718820501.png">
+<meta property="og:image" content="http://yyyffff.github.io/1739720061537.png">
+<meta property="og:image" content="http://yyyffff.github.io/1739720458255.png">
 <meta property="article:published_time" content="2025-02-09T07:09:53.000Z">
-<meta property="article:modified_time" content="2025-02-11T17:17:11.890Z">
+<meta property="article:modified_time" content="2025-02-18T08:10:19.298Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175742174.png">
@@ -247,7 +262,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.4k 字
+          5.6k 字
         
       </span>
     
@@ -258,7 +273,7 @@
         
         
         
-          12 分钟
+          47 分钟
         
       </span>
     
@@ -397,7 +412,232 @@
 <ul>
 <li><strong><code>set_head_size(p, s)</code></strong>  设置当前 chunk 的 <code>size</code> 域，并保留标志位 </li>
 <li><strong><code>set_head(p, s)</code></strong>  设置当前 chunk 的 <code>size</code> 域，并忽略标志位 </li>
-<li><strong><code>set_foot(p, s)</code></strong>  设置下一个 chunk 的 <code>prev_size</code> 为当前 chunk 的大小 W</li>
+<li><strong><code>set_foot(p, s)</code></strong>  设置下一个 chunk 的 <code>prev_size</code> 为当前 chunk 的大小</li>
+</ul>
+<h1 id="5-2分箱式内存管理"><a href="#5-2分箱式内存管理" class="headerlink" title="5.2分箱式内存管理"></a>5.2分箱式内存管理</h1><p>对于空闲的chunk，ptmalloc采用分箱式内存管理方式，将其放在4个不同的bin中</p>
+<ul>
+<li>fast bins<ul>
+<li>小内存块的高速缓存，<strong>小于64字节</strong>的chunk被回收时，首先放入fast bins中，分配小内存时，首先会查看fast bins中是否有合适的，若有则直接返回以加快分配速度</li>
+</ul>
+</li>
+<li>unsorted bin<ul>
+<li>顾名思义，类似一个<strong>中转</strong>。临时存放刚释放的chunk，后续会存到small&#x2F;large bins中。用户请求是首先看这个bin，找到直接返回，没找到再看small&#x2F;large bins</li>
+</ul>
+</li>
+<li>small bins<ul>
+<li>存放固定大小的chunk，共64个bin，最小的chunk大小为16或32字节，每个bin大小<strong>相差8&#x2F;16字节</strong>， Small Bins[0] 管理 32 字节的 chunk，Small Bins[1] 管理 48 字节的 chunk，以此类推</li>
+</ul>
+</li>
+<li>large bins<ul>
+<li>存放大小大于等于512或1024B的空闲chunk，采用<strong>双向链表</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="5-2-1-Small-Bins"><a href="#5-2-1-Small-Bins" class="headerlink" title="5.2.1 Small Bins"></a>5.2.1 Small Bins</h2><p> Chunk_size&#x3D;2 * SIZE_SZ * index</p>
+<ul>
+<li><p>在 SIZE_SZ 为 4B 的平台（<strong>32位</strong>平台）上，small bins 中的 chunk 大小是以 <strong>8B</strong> 为公差的等差数列，<strong>最大的chunk大小为 504B</strong>，<strong>最小的 chunk 大小为 16B</strong>，所以实际共 62 个 bin。分别为 16B、24B、 32B,…,504B。在 SIZE_SZ 为 8B 的平台（<strong>64位</strong>）上，small bins 中的 chunk 大小是以 <strong>16B</strong> 为公差 的等差数列，<strong>最大的 chunk 大小为 1008B，最小的 chunk 大小为 32B</strong>，所以实际共 62 个 bin。</p>
+</li>
+<li><p>ptmalloc维护了62个双向环形链表，每个链表的空闲chunk的大小一直</p>
+</li>
+<li><p>下图为32位平台下ptmalloc的组织方式</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739551424330.png" srcset="/img/loading.gif" lazyload alt="分箱式管理"></p>
+</li>
+</ul>
+<h2 id="5-2-2large-bins"><a href="#5-2-2large-bins" class="headerlink" title="5.2.2large bins"></a>5.2.2large bins</h2><ul>
+<li><p>SIZE_SZ为4B（32位）平台下，&gt;&#x3D;512B，或SIZE_SZ为8B（64位），&gt;&#x3D;1024B的空闲chunk，由large bins管理。一共包含63个bin，每个bin中的chunk大小<strong>不是</strong>固定公差的等差数列，而是分成 6 组 bin，<strong>每组 bin 是一个固定公差的等差数列</strong>，每组的 bin <strong>数量依次为 32、16、8、4、2、1，公差依次为 64B、512B、 4096B、32768B、262144B</strong> 等 </p>
+</li>
+<li><p>比如SIZE_SZ为4的平台，第一个large bin起始chunk大小为512B，共32bin，公差64B，所以Chunk_size&#x3D;512+64*index</p>
+<p>第二个large bin从第一个结束开始，所以Chunk_size&#x3D;512+64<em>32+512</em>index，后面以此类推</p>
+</li>
+<li><p>可以看出large bins和small bins都有规律，我们可以将这两个bins放在同一个包含1<strong>28个chunk的数组上</strong>，前一部分为small bins</p>
+</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739610043953.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739610064636.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li><p>这几个宏可以根据数组下标计算出该 bin 的 chunk <strong>大小（small bins）</strong>或是 chunk 大小<strong>范围（large bins）</strong>，也可以根据需要分配内存块大小计算出所需 chunk 所属 bin 的 index </p>
+</li>
+<li><p>bin_index(sz)根据所需内存大小计算出所需bin的index，再调用smallbin_index(sz)或者largebin_index(sz)</p>
+</li>
+<li><p>smallbin_index(sz)的计算：</p>
+<ul>
+<li>如果SIZE_SZ是4B，那么将sz&#x2F;4</li>
+<li>如果SIZE_SZ是8B，那么将sz&#x2F;4</li>
+</ul>
+</li>
+<li><p>large bins计算会复杂一点</p>
+</li>
+<li><p>在SIZE_SZ是4B的情况下，chunk大小和bin index：</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739639876879.png" srcset="/img/loading.gif" lazyload></p>
+</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739639913107.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739639928725.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>对于 SIZE_SZ 为 4B 的平台，bin[0]和 bin[1]是<strong>不存在</strong>的，因为最小的 chunk 为 <strong>16B</strong>（fd,bk,pre_size,size），small  bins 一共 <strong>62</strong> 个，large bins 一共 <strong>63</strong> 个，加起来一共 <strong>125</strong> 个 bin。而 NBINS 定义为 128，<strong>其实 bin[0]和 bin[127]都不存在</strong>，bin[1]为 unsorted bin 的 chunk 链表头。 </li>
+<li>对于用户要分配的size，要先用,checked_request2size(req,sz)，计算出chunk大小再用bin_index(sz)计算出所属的bin_index</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739689213477.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739689225241.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>bin_at(m,i)通过bin index获得bin的链表头，chunk的fd，bk将空闲chunk链入链表，对于bin的链表头，只需要存储fd，bk即可，size和pre_size对链表来说无意义，所以为了节省空间和提高速度，<strong>每个bin只留了fd和bk的空间</strong></li>
+<li>bin_at(m,i)：<strong>定义</strong>看出bin[0]不存在</li>
+<li>在SIZE_SZ是4B的平台,bin[1]前4B存fd，后4B存bk，bin_at返回malloc_chunk的指针，由于fd在malloc_chunk的偏移地址是 offsetof (struct malloc_chunk, fd))&#x3D;8（前面有size和pre_size，加起来是8B），所以fd地址-8就是malloc_chunk的地址</li>
+<li><strong>对 bin 的链表头的 chunk，一定不能修改 prev_size 和 size 域，这两个域是与其他 bin 的链表头的 fb 和 bk 内存复用的</strong> （其中存储的是fd和bk，若修改的话会破坏双向链表）</li>
+<li>next_bin(b)用于获得下个bin地址：当前bin地址向后移动fd+bk的距离</li>
+<li>bin的链表头的指针fd指向第一个chunk，bk指向最后一个，first(b)获取第一个可用chunk，last(b)获取最后一个可用chunk，这两个宏用于遍历bin</li>
+<li>unlike(P,BK,FD)将chunk从空闲链表中取出来，注意large bins空闲chunk可能在<strong>两个双向链表</strong>中，unlike需要从两个中删除</li>
+</ul>
+<h2 id="5-2-3-Unsorted-bin"><a href="#5-2-3-Unsorted-bin" class="headerlink" title="5.2.3 Unsorted bin"></a>5.2.3 Unsorted bin</h2><ul>
+<li><p>可看作small bins和large bins的cache（缓存），只有一个bin，以双向链表管理，不排序</p>
+</li>
+<li><p>所有chunk回收时首先放到该bin，如果该bin没合适的chunk，那么将该bin所有chunk加入到所属的bins中，然后再在small&#x2F;large bins分配合适的。bins数组中bin[1]用于存储unsorted bin的chunk链表头<br> <img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739699575792.png" srcset="/img/loading.gif" lazyload></p>
+</li>
+</ul>
+<p> <img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739699606500.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>第一个宏将bin[1]设置位unsorted bin的chunk链表头，对top chunk初始化，<strong>暂时</strong>将其初始化位unsorted chunk，这仅仅是初始化一个值，该chunk内容肯定不能用于top chunk来分配内存：<strong>top chunk不属于任何一个bin</strong>，但ptmalloc有些check需要topchunk属于一个bin</li>
+</ul>
+<h2 id="5-2-4fast-bins"><a href="#5-2-4fast-bins" class="headerlink" title="5.2.4fast bins"></a>5.2.4fast bins</h2><ul>
+<li><p>该bins用于提高内存分配效率</p>
+</li>
+<li><p>对SIZE_SZ为4或8B平台，小于64或128B的请求首先查看该bins是否有合适的chunk存在（精准匹配），若存在则直接返回</p>
+</li>
+<li><p>可看作是small bins的前7部分的cache，SIZE_SZ为4&#x2F;8B，每个bin的chunk大小依次为16&#x2F;32，24&#x2F;48，…..</p>
+</li>
+<li><p>32为平台下分配的内存大小和chunk大小和fast bins对应关系如下</p>
+<p><img src="/1739718475251.png" srcset="/img/loading.gif" lazyload></p>
+<p>fast bins可看作LIFO的栈（last in,first out）</p>
+<p><img src="/1739718784433.png" srcset="/img/loading.gif" lazyload></p>
+</li>
+<li><p>根据fast bin的index获取fast bin的地址</p>
+<p><img src="/1739718820501.png" srcset="/img/loading.gif" lazyload></p>
+</li>
+<li><p>fastbin_index(sz)用于获得fast bin在fast bins数组中的index  </p>
+<ul>
+<li>SIZE_SZ为4&#x2F;8，将sz除以8&#x2F;16后-2（bin[0],bin[1]不存在）</li>
+</ul>
+</li>
+</ul>
+<p><img src="/1739720061537.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>根据SIZE_SZ的不同大小，MAX_FAST_SIZE为80B或160B</li>
+<li>NFASTBINS为10（fast bins的数组大小）</li>
+<li>FASTBIN_CONSOLIDATION_THRESHOLD 用于检查，当释放的chunk与该chunk相邻chunk合并后大于64KB，认为内存碎片较多，需要将fast bins中所有chunk都合并，减少内存碎片对系统的影响</li>
+</ul>
+<p><img src="/1739720458255.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>DEFAULT_MXFAST定义了默认fast bins中最大的chunk大小，SIZE_SZ为4&#x2F;8B，大小分别是64B&#x2F;128B</li>
+<li>set_max_fast(s)将全局变量global_max_fast<strong>设置</strong>为DEAFAULT_MXFAST</li>
+<li>get_max_fast()用于<strong>获得</strong>这个全局变量的值</li>
+</ul>
+<h1 id="5-3-核心结构体分析"><a href="#5-3-核心结构体分析" class="headerlink" title="5.3 核心结构体分析"></a>5.3 核心结构体分析</h1><p>ptmalloc使用malloc_state来管理分配区，参数管理用struct malloc_par</p>
+<h2 id="5-3-1-malloc-state"><a href="#5-3-1-malloc-state" class="headerlink" title="5.3.1 malloc_state"></a>5.3.1 malloc_state</h2><p>struct malloc_state定义如下</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_state</span> &#123;</span><br> <span class="hljs-comment">/* Serialize access. */</span><br> <span class="hljs-comment">//序列化访问</span><br> <span class="hljs-type">mutex_t</span> mutex;<br> <span class="hljs-comment">/* Flags (formerly in max_fast). */</span><br> <span class="hljs-type">int</span> flags;<br><span class="hljs-meta">#<span class="hljs-keyword">if</span> THREAD_STATS</span><br>   <span class="hljs-comment">/* Statistics for locking. Only used if THREAD_STATS is defined. */</span>  <br>     <span class="hljs-comment">//用于锁定的数据，仅在THREAD_STATS定义时被使用</span><br> <span class="hljs-type">long</span> stat_lock_direct, stat_lock_loop, stat_lock_wait;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br> <span class="hljs-comment">/* Fastbins */</span><br> mfastbinptr fastbinsY[NFASTBINS];<br> <span class="hljs-comment">/* Base of the topmost chunk -- not otherwise kept in a bin */</span><br> <span class="hljs-comment">//top chunk的基地址不会被存储在其他bin中</span><br> mchunkptr top;<br> <span class="hljs-comment">/* The remainder from the most recent split of a small request */</span><br>     <span class="hljs-comment">//最近的一次分割请求产生的剩余块</span><br> mchunkptr last_remainder;<br> <span class="hljs-comment">/* Normal bins packed as described above */</span><br>     <span class="hljs-comment">//按描述的方式打包正常的bin</span><br> mchunkptr bins[NBINS * <span class="hljs-number">2</span> - <span class="hljs-number">2</span>];<br> <span class="hljs-comment">/* Bitmap of bins */</span><br>     <span class="hljs-comment">//bin的位图</span><br> <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> binmap[BINMAPSIZE];<br> <span class="hljs-comment">/* Linked list */</span><br>     <span class="hljs-comment">//链表</span><br> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_state</span> *<span class="hljs-title">next</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> PER_THREAD</span><br> <span class="hljs-comment">/* Linked list for free arenas. */</span><br>     <span class="hljs-comment">//用于空闲区域（arena）的链表</span><br> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_state</span> *<span class="hljs-title">next_free</span>;</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br> <span class="hljs-comment">/* Memory allocated from the system in this arena. */</span><br>     <span class="hljs-comment">//此区域中从系统分配的内存</span><br> INTERNAL_SIZE_T system_mem;<br> INTERNAL_SIZE_T max_system_mem;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>Mutex（互斥锁）用于串行化访问分配区，当有多线程访问同一分配区时，第一个获得mutex的线程可以访问该分配区，分配完成后释放mutex供其他线程使用</li>
+<li>Flags记录分配区的标志，bit0记录分配区是否至少有一个fast bin chunk，bit1用于记录分配区是否能返回连续的虚拟地址空间</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> FASTCHUNKS_BIT held in max_fast indicates that there are probably</span><br><span class="hljs-comment"> some fastbin chunks. It is set true on entering a chunk into any</span><br><span class="hljs-comment"> fastbin, and cleared only in malloc_consolidate.</span><br><span class="hljs-comment"> The truth value is inverted so that have_fastchunks will be true</span><br><span class="hljs-comment"> upon startup (since statics are zero-filled), simplifying</span><br><span class="hljs-comment"> initialization checks.</span><br><span class="hljs-comment">*/</span><br><span class="hljs-comment">//FASTCHUNKS_BIT 存储在 max_fast 中，表示可能存在一些快速分配区（fastbin）的块。当一个块被放入任何一个快速分配区时，该标志会被设置为 true，并且仅在 malloc_consolidate 函数中被清除。</span><br><span class="hljs-comment">//该标志的真假值被反转，以便在启动时 have_fastchunks 为 true（因为静态变量会被初始化为零），从而简化初始化检查。</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> FASTCHUNKS_BIT (1U)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> have_fastchunks(M) (((M)-&gt;flags &amp; FASTCHUNKS_BIT) == 0)</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> ATOMIC_FASTBINS</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> clear_fastchunks(M) catomic_or (&amp;(M)-&gt;flags, FASTCHUNKS_BIT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> set_fastchunks(M) catomic_and (&amp;(M)-&gt;flags, ~FASTCHUNKS_BIT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> clear_fastchunks(M) ((M)-&gt;flags |= FASTCHUNKS_BIT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> set_fastchunks(M) ((M)-&gt;flags &amp;= ~FASTCHUNKS_BIT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span> </span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>上面的宏用于设置或置为flags中fast chunk的标志位bit0，0表示分配区有fast chunk，1表示没有</p>
+</li>
+<li><p>初始化完成的malloc_state中，flag值为0，表示该分配区有fast chunk，但<strong>实际上没有</strong>，试图从fast bins中分配chunk都会返回NULL</p>
+</li>
+<li><p>第一次调用malloc_consolidate()对fast bins进行chunk合并时，如果max_fast&gt;0，则调用clear_fastchunks，标志该分配区没有fast chunk（malloc_consolidate()会合并fast bins中所有chunk）</p>
+</li>
+<li><p>clear_fastchunks宏只在函数malloc_consolidate()中调用</p>
+</li>
+<li><p>当有fast chunk加入fast bins时，就调用set_fastchunks宏记录分配区的fast bins中存在fast chunk</p>
+</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> NONCONTIGUOUS_BIT indicates that MORECORE does not return contiguous</span><br><span class="hljs-comment"> regions. Otherwise, contiguity is exploited in merging together,</span><br><span class="hljs-comment"> when possible, results from consecutive MORECORE calls.</span><br><span class="hljs-comment"> The initial value comes from MORECORE_CONTIGUOUS, but is</span><br><span class="hljs-comment"> changed dynamically if mmap is ever used as an sbrk substitute.</span><br><span class="hljs-comment">*/</span><br><span class="hljs-comment">//NONCONTIGUOUS_BIT 表示 MORECORE 不返回连续的内存区域。否则，会利用连续性，在可能的情况下，将连续的 MORECORE 调用的结果合并在一起。</span><br><span class="hljs-comment">//初始值来自 MORECORE_CONTIGUOUS，但如果 mmap 曾经被用作 sbrk 的替代品，这个值会被动态更改。</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> NONCONTIGUOUS_BIT (2U)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> contiguous(M) (((M)-&gt;flags &amp; NONCONTIGUOUS_BIT) == 0)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> noncontiguous(M) (((M)-&gt;flags &amp; NONCONTIGUOUS_BIT) != 0)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> set_noncontiguous(M) ((M)-&gt;flags |= NONCONTIGUOUS_BIT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> set_contiguous(M) ((M)-&gt;flags &amp;= ~NONCONTIGUOUS_BIT)</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>Flags的bit1为0表示MORCORE返回<strong>连续</strong>虚拟地址空间，为1表示返回<strong>非连续</strong>虚拟空间</li>
+<li>对于主分配区，MORCORE其实为sbr()，是连续</li>
+<li>对于非主分配区，使用mmap()分配大块虚拟内存，然后切分来模拟主分配区，而通常mmap是非连续的，所以<strong>非主分配区默认分配非连续虚拟地址空间</strong></li>
+<li>malloc_state中声明了几个对锁的统计变量，默认没定义THREAD_STATS（编译时的选项，当其被定义时，ptmalloc会收集与线程相关的内存分配和释放的统计信息，例如每个线程的分配内存大小，分配次数等。），所以不会对锁使用情况进行统计</li>
+<li>fastbinY有10个元素（NFSTBINS）的数组，用于存放fast chunk链表头指针，所以fast bins最多包含10个fast chunk的单向链表</li>
+<li>top是一个chunk的指针，指向分配区的top chunk</li>
+<li>last_remainder是一个chunk指针，分配区上次分配small chunk时从一个chunk裂出一个chunk返回给用户，剩余部分形成一个chuhnk，被last_remaider指向</li>
+<li>bins用来存储unsorted bin,small bins和large bins的chunk链表头，small bins62个，large bins63个，共125个，bin[1]为unsorted bins链表头，bin[0],bin[127]不存在，所以共126bins，Bins数组共有  254（NBINS*2 – 2）个 mchunkptr  指针，这里由于size,pre_size,fd_nextsize,bk_nextsize对存储无意义，所以在SIZE_SZ为8的平台上，只需要126*2*8&#x3D;2016个字节即可，bins数组大小为（128*2-2）*8&#x3D;2032大小，最后16个字节被浪费掉了</li>
+<li>binmap字段是一个int数组，ptmalloc用一个bit表示该bit对应的bin中有无空闲chunk</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> Binmap</span><br><span class="hljs-comment"> To help compensate for the large number of bins, a one-level index</span><br><span class="hljs-comment"> structure is used for bin-by-bin searching. `binmap&#x27; is a</span><br><span class="hljs-comment"> bitvector recording whether bins are definitely empty so they can</span><br><span class="hljs-comment"> be skipped over during during traversals. The bits are NOT always</span><br><span class="hljs-comment"> cleared as soon as bins are empty, but instead only</span><br><span class="hljs-comment"> when they are noticed to be empty during traversal in malloc.</span><br><span class="hljs-comment">*/</span><br><span class="hljs-comment">/* Conservatively use 32 bits per map word, even if on 64bit system */</span><br><span class="hljs-comment">/*</span><br><span class="hljs-comment">Binmap（位图）</span><br><span class="hljs-comment">为了弥补 bin 数量较多的问题，这里使用了一种单级索引结构来进行逐个 bin 的搜索。binmap 是一个位向量，用于记录 bin 是否绝对为空，以便在遍历时跳过这些空的 bin。这些位并不是在 bin 变为空时立即清零，而是在 malloc 遍历时发现 bin 为空时才清除。*/</span><br><span class="hljs-comment">/* 保守地使用 32 位来表示每个映射单元，即使在 64 位系统上也是如此 */</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> BINMAPSHIFT 5</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> BITSPERMAP (1U &lt;&lt; BINMAPSHIFT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> BINMAPSIZE (NBINS / BITSPERMAP)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> idx2block(i) ((i) &gt;&gt; BINMAPSHIFT)</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> idx2bit(i) ((1U &lt;&lt; ((i) &amp; ((1U &lt;&lt; BINMAPSHIFT)-1))))</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> mark_bin(m,i) ((m)-&gt;binmap[idx2block(i)] |= idx2bit(i))</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> unmark_bin(m,i) ((m)-&gt;binmap[idx2block(i)] &amp;= ~(idx2bit(i)))</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> get_binmap(m,i) ((m)-&gt;binmap[idx2block(i)] &amp; idx2bit(i))</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>binmap一共28bit，16字节，4个int大小，binmap按int分成4个block，每个block有32bit，根据bin index可以用宏idx2block计算出该bin在binmap对应的bit属于哪个block</li>
+<li>idx2bit宏取第i位为1，其他位都是0的掩码，比如idx2bit(3):0000 1000（低位向高位，从第0位开始）</li>
+<li>mark_bin设置第i个bin在binmap中对应bit位为1，unmark_bin设置为0，get_binmap获取第i个bin对应的bit</li>
+<li>next用于将分配区以单向链表链接起来</li>
+<li>next_free将空闲分配区链接到单向链表中，仅当PER_THREAD定义时才定义该字段</li>
+<li>system_mem字段记录当前分配区已分配内存大小</li>
+<li>max_system_mem记录当前分配区最大能分配的内存大小</li>
+</ul>
+<h2 id="5-3-2-Malloc-par"><a href="#5-3-2-Malloc-par" class="headerlink" title="5.3.2 Malloc_par"></a>5.3.2 Malloc_par</h2><p>malloc_par定义：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_par</span> &#123;</span><br> <span class="hljs-comment">/* Tunable parameters */</span><br><span class="hljs-comment">/* 可调节参数 */</span><br> <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> trim_threshold;<br> INTERNAL_SIZE_T top_pad;<br> INTERNAL_SIZE_T mmap_threshold;<br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> PER_THREAD</span><br> INTERNAL_SIZE_T arena_test;<br> INTERNAL_SIZE_T arena_max;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br> <span class="hljs-comment">/* Memory map support */</span><br>     <span class="hljs-comment">/* 内存映射支持 */</span><br> <span class="hljs-type">int</span> n_mmaps;<br> <span class="hljs-type">int</span> n_mmaps_max;<br> <span class="hljs-type">int</span> max_n_mmaps;<br> <span class="hljs-comment">/* the mmap_threshold is dynamic, until the user sets</span><br><span class="hljs-comment"> it manually, at which point we need to disable any</span><br><span class="hljs-comment"> dynamic behavior. */</span><br><span class="hljs-comment">/* mmap_threshold 是动态的，直到用户手动设置它为止。在用户手动设置后，我们需要禁用任何动态行为。*/</span><br> <span class="hljs-type">int</span> no_dyn_threshold;<br> <span class="hljs-comment">/* Cache malloc_getpagesize */</span><br>    <span class="hljs-comment">/* 缓存 malloc_getpagesize 的值 */</span><br> <span class="hljs-type">unsigned</span> <span class="hljs-type">int</span> pagesize;<br> <span class="hljs-comment">/* Statistics */</span><br> <span class="hljs-comment">/*数据*/</span><br> INTERNAL_SIZE_T mmapped_mem;<br> INTERNAL_SIZE_T max_mmapped_mem;<br> INTERNAL_SIZE_T max_total_mem; <span class="hljs-comment">/* only kept for NO_THREADS */</span><span class="hljs-comment">/* 仅用于 NO_THREADS 情况 */</span><br> <span class="hljs-comment">/* First address handed out by MORECORE/sbrk. */</span><br>     <span class="hljs-comment">/* 通过 MORECORE/sbrk 分配的第一个地址。*/</span><br> <span class="hljs-type">char</span>* sbrk_base;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>trim_threshold字段表示收缩阈值，<strong>默认128KB</strong>，当每个分配区top chunk大于该阈值时，会被free掉</li>
+<li>由于mmap分配阈值的动态调整，在free时可能将收缩阈值修改为mmap的分配阈值的2倍<ul>
+<li>64位下，mmap分配阈值32MB，所以收缩阈值64MB</li>
+<li>32位下，mmap分配阈值512B，所以收缩阈值1MB</li>
+</ul>
+</li>
+<li>收缩阈值可通过mllocpt()设置</li>
+<li>top_pad表示分配时是否有添加额外的pad（额外添加的内存），默认是0。（ 在 glibc 的 ptmalloc 内存分配器中，<code>top_pad</code> 字段用于控制在初始化或扩展堆时，分配器会额外申请的内存大小。这个字段的默认值为 0，表示在分配内存时不会额外添加填充 ）</li>
+<li>mmap_threshold表示mmap分配阈值，默认128KB。32位最大512KB，64位下最大32MB，由于默认开启mmap分配阈值动态调整，该字段会被动态调整，但不会超过最大值</li>
+<li>area_test,arena_max用于PER_THREAD优化，32位下arena_test默认为2，64位：8<ul>
+<li>当创建分配区数量达到arena_test时，系统会根据当前配置计算分配区最大数量，并将其设置为一个固定值</li>
+<li>arena_max默认是0，表示分配区最大数量由arena_test决定，当系统中分配区数量达到arena_max时就不会创建新分配区而是通过重用已有的分配区</li>
+<li>这两个值都可以通过mallopt()调整</li>
+</ul>
+</li>
+<li>n_mmaps字段表示当前进程使用mmap()分配的内存块数量</li>
+<li>n_mmaps_max表示<strong>进程</strong>使用mmap()分配内存块的最大数量，默认65536，可以使用mallopt()修改</li>
+<li>max_n_mmaps表示<strong>当前进程</strong>使用mmap分配的内存块最大数量，以确保不会超过n_mmap_max， <code>max_n_mmaps</code> 的值通常由 <code>n_mmaps_max</code> 决定，用户通过调整 <code>n_mmaps_max</code> 来间接影响 <code>max_n_mmap</code> ，该字段是由于mstats()函数输出统计需要该字段</li>
+<li>no_dyn_threshold表示是否开启mmap分配阈值的动态调整，默认值0，表示开启</li>
+<li>pagsize表示系统的页大小，默认4KB</li>
+<li>mmapped_mem和max_nmmapped_mem都用于统计mmap分配的内存大小，一般情况二者相等，max_mmapped_mem用于mstats()函数<ul>
+<li>max_total_mem字段在<strong>单线程</strong>情况下用于统计进程分配的内存总数</li>
+</ul>
+</li>
+<li>sbrk_base字段表示堆的起始地址</li>
+</ul>
+<h1 id="5-3-3分配区的初始化"><a href="#5-3-3分配区的初始化" class="headerlink" title="5.3.3分配区的初始化"></a>5.3.3分配区的初始化</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* There are several instances of this struct (&quot;arenas&quot;) in this</span><br><span class="hljs-comment"> malloc. If you are adapting this malloc in a way that does NOT use</span><br><span class="hljs-comment"> a static or mmapped malloc_state, you MUST explicitly zero-fill it</span><br><span class="hljs-comment"> before using. This malloc relies on the property that malloc_state</span><br><span class="hljs-comment"> is initialized to all zeroes (as is true of C statics). */</span><br><span class="hljs-comment">/*</span><br><span class="hljs-comment">在这个内存分配器中，存在多个这种结构体（“分配区”）。如果你正在以一种不使用静态分配或通过 mmap 映射的 malloc_state 的方式调整这个内存分配器，你必须在使用之前显式地将其清零。这个内存分配器依赖于 malloc_state 被初始化为全零的特性（这与 C 语言中静态变量的初始化行为一致）。</span><br><span class="hljs-comment">*/</span><br><span class="hljs-type">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_state</span> <span class="hljs-title">main_arena</span>;</span><br><span class="hljs-comment">/* There is only one instance of the malloc parameters. */</span><br><span class="hljs-comment">/* 只有一个实例的内存分配参数。*/</span><br><span class="hljs-type">static</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">malloc_par</span> <span class="hljs-title">mp_</span>;</span><br><span class="hljs-comment">/* Maximum size of memory handled in fastbins. */</span><br><span class="hljs-comment">/* fastbins 中处理的内存块的最大大小。*/</span><br><span class="hljs-type">static</span> INTERNAL_SIZE_T global_max_fast;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>main_arena：主分配区，任何进程有且仅有一个主分配区</li>
+<li>mp_：全局唯一malloc_par实例，用于参数管理和统计信息，比如<ul>
+<li><code>mp_</code> 包含了内存分配器的各种可调节参数，例如 <code>mmap_threshold</code>（使用 <code>mmap</code> 分配的阈值）、<code>trim_threshold</code>（堆收缩的阈值）等。</li>
+<li>它还记录了一些统计信息，例如当前的内存使用情况、分配的内存块数量等。</li>
+</ul>
+</li>
+<li>global_max_fast全局变量表示fast bins中最大chunk的大小</li>
+</ul>
+<p>main_arena初始化函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> Initialize a malloc_state struct.</span><br><span class="hljs-comment"> This is called only from within malloc_consolidate, which needs</span><br><span class="hljs-comment"> be called in the same contexts anyway. It is never called directly</span><br><span class="hljs-comment"> outside of malloc_consolidate because some optimizing compilers try</span><br><span class="hljs-comment"> to inline it at all call points, which turns out not to be an</span><br><span class="hljs-comment"> optimization at all. (Inlining it in malloc_consolidate is fine though.)</span><br><span class="hljs-comment">*/</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span> __STD_C</span><br><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">malloc_init_state</span><span class="hljs-params">(mstate av)</span><br><span class="hljs-meta">#<span class="hljs-keyword">else</span></span><br><span class="hljs-type">static</span> <span class="hljs-type">void</span> <span class="hljs-title function_">malloc_init_state</span><span class="hljs-params">(av)</span> mstate av;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>&#123;<br> <span class="hljs-type">int</span> i;<br> mbinptr bin;<br> <span class="hljs-comment">/* Establish circular links for normal bins */</span><br> <span class="hljs-keyword">for</span> (i = <span class="hljs-number">1</span>; i &lt; NBINS; ++i) &#123;<br> bin = bin_at(av,i);<br> bin-&gt;fd = bin-&gt;bk = bin;<br> &#125;<br><span class="hljs-comment">//设置非主分配区</span><br><span class="hljs-meta">#<span class="hljs-keyword">if</span> MORECORE_CONTIGUOUS</span><br> <span class="hljs-keyword">if</span> (av != &amp;main_arena)<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br> set_noncontiguous(av);<br><span class="hljs-comment">//初始化主分配区</span><br> <span class="hljs-keyword">if</span> (av == &amp;main_arena)<br> set_max_fast(DEFAULT_MXFAST);<br><span class="hljs-comment">//设置标志位</span><br> av-&gt;flags |= FASTCHUNKS_BIT;<br><span class="hljs-comment">//初始化top chunk</span><br> av-&gt;top = initial_top(av);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>分配区初始化函数默认分配区的实例av是全局静态变量或已经将av所有字段清0</li>
+<li>初始化：遍历所有bins，将每个bin中空闲链表置空，就是将bin的fd，bk都指向bin本身</li>
+<li>由于默认av为0，即默认分配连续虚拟地址空间，但只有<strong>主分配区才可以分配连续的</strong>，所以对于非主分配区，需要设置其为分配非连续虚拟地址空间</li>
+<li>若初始化主分配区，则需要设置global_max_fast，由于主分配区最先被初始化，这保证global_max_fast只被初始化一次。由此，如果global_max_fast值非0，那么意味着主分配区已经被初始化</li>
+<li>最后初始化top chunk</li>
+</ul>
+<p>Ptmalloc参数初始化</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Set up basic state so that _int_malloc et al can work. */</span><br><span class="hljs-type">static</span> <span class="hljs-type">void</span><br><span class="hljs-title function_">ptmalloc_init_minimal</span> <span class="hljs-params">(<span class="hljs-type">void</span>)</span><br>&#123;<br><span class="hljs-meta">#<span class="hljs-keyword">if</span> DEFAULT_TOP_PAD != 0</span><br> mp_.top_pad = DEFAULT_TOP_PAD;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-comment">//mmap参数设置</span><br> mp_.n_mmaps_max = DEFAULT_MMAP_MAX;<br> mp_.mmap_threshold = DEFAULT_MMAP_THRESHOLD;<br><span class="hljs-comment">//内存收缩阈值设置</span><br> mp_.trim_threshold = DEFAULT_TRIM_THRESHOLD;<br><span class="hljs-comment">//页</span><br> mp_.pagesize = malloc_getpagesize;<br><span class="hljs-comment">//线程本地分配区数量      </span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> PER_THREAD</span><br><span class="hljs-meta"># <span class="hljs-keyword">define</span> NARENAS_FROM_NCORES(n) ((n) * (sizeof(long) == 4 ? 2 : 8))</span><br> mp_.arena_test = NARENAS_FROM_NCORES (<span class="hljs-number">1</span>);<br> narenas = <span class="hljs-number">1</span>;<br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>主要将全局变量mp_字段初始化为默认值</li>
+<li>若定义编译选项PER_THREAD，会根据cpu核心数计算分配区数量<ul>
+<li>32位每个核心2分配区</li>
+<li>64位每个核心8分配区</li>
+</ul>
+</li>
 </ul>
 
                 
