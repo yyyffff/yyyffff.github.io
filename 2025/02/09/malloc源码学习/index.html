@@ -53,7 +53,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/1739720061537.png">
 <meta property="og:image" content="http://yyyffff.github.io/1739720458255.png">
 <meta property="article:published_time" content="2025-02-09T07:09:53.000Z">
-<meta property="article:modified_time" content="2025-03-18T16:04:10.867Z">
+<meta property="article:modified_time" content="2025-03-20T16:55:41.030Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175742174.png">
@@ -370,7 +370,7 @@
 <li><p>在linux X86_64平台中，假设SIZE_SZ为8字节，空闲时，一个chunk至少要有4<em>size_t空间（来存储prev_size,size,fd,bk）也就是*<em>MINSIZE（32B）</em></em></p>
 </li>
 <li><p>可以看到转换时不但考虑地址对齐，还<strong>额外加上了SIZE_SZ</strong>，原因：</p>
-<p>对于一个使用中的chunk，其下一个chunk的pre_size处于无效的，可以被当前chunk所使用，所以<strong>in_use_size&#x3D;(用户请求大小 +16(pre_size+size)-8(借了下一个chunk的pre_size)) align to 8B</strong></p>
+<p>对于一个使用中的chunk，其下一个chunk的pre_size处于无效的，可以被当前chunk所使用，所以<strong>in_use_size&#x3D;(用户请求大小 +16(pre_size+size)-8(借了下一个chunk的pre_size)) align to 16B</strong></p>
 <p>又因为空闲时的chunk和使用中的chunk使用的是同一块空间，所以取最大者为实际分配的空间，所以最终chunk_size&#x3D;max(in_use_size,32(MINSIZE))</p>
 </li>
 <li><p>如果chunk由mmap直接分配，就不会有前一个和后一个chunk，所以借不到下一个chunk的pre_size，所以overhead&#x3D;2*SIZE_SZ</p>
