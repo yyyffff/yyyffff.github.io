@@ -4,6 +4,32 @@
   
   
   <entry>
+    <title>c++代码学习</title>
+    <link href="/2025/03/19/c++%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/"/>
+    <url>/2025/03/19/c++%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/</url>
+    
+    <content type="html"><![CDATA[<h1 id="内存分区模型"><a href="#内存分区模型" class="headerlink" title="内存分区模型"></a>内存分区模型</h1><ul><li>代码区：存放二进制代码，由操作系统管理</li><li>全局区：存放全局变量、静态变量、全局常量</li><li>栈区：<strong>编译器</strong>自动分配释放，存放函数参数值、局部变量等</li><li>堆区：由<strong>程序员</strong>分配、释放，若不释放，结束时由操作系统回收</li></ul><p>意义：赋予不同的生命周期，灵活编程</p><h2 id="程序运行前"><a href="#程序运行前" class="headerlink" title="程序运行前"></a>程序运行前</h2><p>未执行.exe文件前，分为两个区域</p><ul><li><p>代码区：</p><ul><li>存放cpu执行的机器指令</li><li>特点：共享（频繁被执行的程序只要在内存中有一份代码即可），只读（防止程序意外修改了指令）</li></ul></li><li><p>全局区：</p><ul><li><p>全局变量和静态变量在此</p></li><li><p>包含常量区，字符串常量和其他常量也存放在此</p></li><li><p>该区域数据在程序结束后由<strong>操作系统</strong>释放</p></li><li><p>静态变量：在前面加<code>static</code>，比如<code>static int a=10</code></p><p>常量：分为全局的和局部的，但只有全局的常量在常量区，<code>const int a=10</code></p></li></ul></li></ul><h2 id="程序运行后"><a href="#程序运行后" class="headerlink" title="程序运行后"></a>程序运行后</h2><ul><li>栈区<ul><li>存放函数的局部变量及参数，编译器自动开辟与free</li></ul></li><li>堆区<ul><li>由程序员手动分配与释放，如果程序员不释放的话就由操作系统释放</li><li>在c++中用<code>new</code>来分配内存</li></ul></li></ul><h2 id="new操作符语法"><a href="#new操作符语法" class="headerlink" title="new操作符语法"></a>new操作符语法</h2>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>堆的攻击</title>
+    <link href="/2025/03/19/%E5%A0%86%E7%9A%84%E6%94%BB%E5%87%BB/"/>
+    <url>/2025/03/19/%E5%A0%86%E7%9A%84%E6%94%BB%E5%87%BB/</url>
+    
+    <content type="html"><![CDATA[<h1 id="堆溢出"><a href="#堆溢出" class="headerlink" title="堆溢出"></a>堆溢出</h1><h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><ul><li><p>简介：</p><ul><li>程序向堆块写入的字节数超过了堆块本身的字节数（<strong>不是用户申请的字节数</strong>，因为在内部用户申请的字节数会被转换为实际向系统申请的字节数，该数大于等于用户申请的字节数），可以<strong>覆盖到相邻的高地址</strong>的下一个堆块</li></ul></li><li><p>条件：</p><ul><li>向堆上写入数据</li><li>写入的数据大小没被良好的控制</li></ul></li></ul>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>buu做题记录</title>
     <link href="/2025/02/19/buu%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/"/>
     <url>/2025/02/19/buu%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/</url>
