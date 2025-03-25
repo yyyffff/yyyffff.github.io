@@ -26,10 +26,13 @@
 <meta property="og:site_name" content="yyyffff">
 <meta property="og:description" content="堆溢出原理 简介：  程序向堆块写入的字节数超过了堆块本身的字节数（不是用户申请的字节数，因为在内部用户申请的字节数会被转换为实际向系统申请的字节数，该数大于等于用户申请的字节数），可以覆盖到相邻的高地址的下一个堆块   条件：  向堆上写入数据 写入的数据大小没被良好的控制    与栈溢出等不同的是我们不可以直接通过堆溢出直接控制EIP，我们也就无法直接控制程序执行对应的程序，对于堆溢出：  覆">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1742917802270.png">
+<meta property="og:image" content="http://yyyffff.github.io/1742917834909.png">
 <meta property="article:published_time" content="2025-03-19T08:14:20.000Z">
-<meta property="article:modified_time" content="2025-03-20T16:55:46.743Z">
+<meta property="article:modified_time" content="2025-03-25T16:05:56.011Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1742917802270.png">
   
   
   
@@ -235,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          509 字
+          1.5k 字
         
       </span>
     
@@ -246,7 +249,7 @@
         
         
         
-          5 分钟
+          13 分钟
         
       </span>
     
@@ -374,6 +377,87 @@
 </ul>
 </li>
 </ul>
+<h1 id="堆中的Off-By-One"><a href="#堆中的Off-By-One" class="headerlink" title="堆中的Off-By-One"></a>堆中的Off-By-One</h1><p>就是溢出时刚好只多了一个字节，往往与边界验证不严和字符串操作有关，比如</p>
+<ul>
+<li>使用循环时次数设置错误</li>
+<li>字符串操作不合适，比如<code>stelen</code>和<code>strcpt</code>不一致时，<code>strlen</code>不会考虑\x00但<code>strcpy</code>会拷贝</li>
+</ul>
+<h2 id="利用思路"><a href="#利用思路" class="headerlink" title="利用思路"></a>利用思路</h2><ol>
+<li>溢出字节是可控制的人以字节：通过修改大小造成块之间出现重叠-&gt;泄露数据，或是覆盖数据</li>
+<li>溢出字节是NULL字节：在size&#x3D;0x100时，溢出NULL字节可以让<code>prev_in_use</code>被清理，这样前面的那个块就会被认为是free的，这时<ul>
+<li>可以使用<code>unlink</code>处理</li>
+<li>这是<code>pre_size</code>就会启用，可以伪造它来造成块之间的重叠，这个方法的关键在于unlink没有检查按照<code>pre_size</code>找到的块与<code>pre_size</code>是否一致</li>
+</ul>
+</li>
+</ol>
+<p>在新版本中加入了对方法二的check</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* consolidate backward */</span><br>    <span class="hljs-keyword">if</span> (!prev_inuse(p)) &#123;<br>      prevsize = prev_size (p);<br>      size += prevsize;<br>      p = chunk_at_offset(p, -((<span class="hljs-type">long</span>) prevsize));<br>      <span class="hljs-comment">/* 后两行代码在最新版本中加入，则 2 的第二种方法无法使用，但是 2.28 及之前都没有问题 */</span><br>      <span class="hljs-keyword">if</span> (__glibc_unlikely (chunksize(p) != prevsize))<br>        malloc_printerr (<span class="hljs-string">&quot;corrupted size vs. prev_size while consolidating&quot;</span>);<br>      unlink_chunk (av, p);<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="Chunk-Extend-and-Overlapping"><a href="#Chunk-Extend-and-Overlapping" class="headerlink" title="Chunk Extend and Overlapping"></a>Chunk Extend and Overlapping</h1><h2 id="名词解释："><a href="#名词解释：" class="headerlink" title="名词解释："></a>名词解释：</h2><ul>
+<li><code>Chunk Extend</code>:通过修改堆块大小，扩展其范围以覆盖相邻内存</li>
+<li><code>Overlapping</code>:使多个堆块内存区域重叠，通过一个堆块修改另一个堆块的内容</li>
+</ul>
+<h2 id="条件："><a href="#条件：" class="headerlink" title="条件："></a>条件：</h2><ul>
+<li>程序存在堆漏洞</li>
+<li>漏洞可以控制<code>chunk header</code>（就是<code>size</code>那些数据)中的数据</li>
+</ul>
+<h2 id="原理-1"><a href="#原理-1" class="headerlink" title="原理:"></a>原理:</h2><ul>
+<li>该攻击方式能够实现的原因在于<code>ptmalloc</code>对堆操作时的各种宏</li>
+<li>简而言之，<code>ptmalloc</code>通过<code>chunk header</code>的数据判断<code>chunk</code>的使用情况和对前后<code>chunk</code>进行定位，<code>chunk extend</code>就是通过控制<code>size</code>和<code>pre_size</code>来实现跨越块的操作从而<code>overlapping</code>的</li>
+</ul>
+<h2 id="实例："><a href="#实例：" class="headerlink" title="实例："></a>实例：</h2><ul>
+<li><p>对<code>inuse</code>的<code>fastbin</code>进行<code>extend</code></p>
+<ul>
+<li><p>就是通过第一个块的大小来控制第二个块的内容（演示都是在<strong>64</strong>位环境下）</p>
+</li>
+<li><p>通过修改第一个块的<code>size</code>来在<code>free</code>时将两个块变成一个块，这样在第二次<code>malloc</code>时可以获得第二个块内容</p>
+</li>
+<li><pre><code class="c">int main(void)
+&#123;
+    void *ptr,*ptr1;
+
+    ptr=malloc(0x10);//分配第一个0x10的chunk
+    malloc(0x10);//分配第二个0x10的chunk
+
+    *(long long *)((long long)ptr-0x8)=0x41;// 修改第一个块的size域
+
+    free(ptr);
+    ptr1=malloc(0x30);// 实现 extend，控制了第二个块的内容
+    return 0;
+&#125;
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey"><br>+ 对`inuse`的`smallbin`进行`extend`<br><br>  + 与`fastbin`方法类似，不过`small bin free`时会被置于`unsorted bin`，而且释放时如果与`top chunk`相连，就会和并到`top chunk`里<br><br>  + ```c<br>    int main()<br>    &#123;<br>        void *ptr,*ptr1<span class="hljs-comment">;</span><br>    <br>        ptr=malloc(<span class="hljs-number">0</span>x80)<span class="hljs-comment">;//分配第一个 0x80 的chunk1</span><br>        malloc(<span class="hljs-number">0</span>x10)<span class="hljs-comment">; //分配第二个 0x10 的chunk2</span><br>        malloc(<span class="hljs-number">0</span>x10)<span class="hljs-comment">; //防止与top chunk合并</span><br>    <br>        *(int *)((int)ptr-<span class="hljs-number">0</span>x8)=<span class="hljs-number">0</span>xb1<span class="hljs-comment">;</span><br>        free(ptr)<span class="hljs-comment">;</span><br>        ptr1=malloc(<span class="hljs-number">0</span>xa0)<span class="hljs-comment">;</span><br>    &#125;<br></code></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+<li><p>对<code>free</code>的<code>small bin</code>进行<code>extend</code></p>
+<ul>
+<li><pre><code class="c">int main()
+&#123;
+    void *ptr,*ptr1;
+
+    ptr=malloc(0x80);//分配第一个0x80的chunk1
+    malloc(0x10);//分配第二个0x10的chunk2
+
+    free(ptr);//首先进行释放，使得chunk1进入unsorted bin
+
+    *(int *)((int)ptr-0x8)=0xb1;
+    ptr1=malloc(0xa0);
+&#125;
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey"><br>+ 通过`extend`后向`overlapping`<br>+ 通过`extend`前向`overlapping`<br><br>## Chunk Extend作用<br><br>这种技术不能直接控制程序的执行流程，但是可以控制`chunk`的内容，如果`chunk`内存在字符串指针或函数指针之类的，就可以通过此来信息泄露和控制程序流<br><br>通过`extend`来`overlapping`，通过`overlapping`可以控制`chunk`中`fd/bk`指针从而实现`fastbin attack`等利用<br><br># unlink<br><br>顾名思义，脱链操作<br><br>## 原理：<br><br>对chunk中内容进行布局，接触unlink操作来发成修改指针的目的<br><br>核心<br><br>```c<br>// P 是要解除链接的空闲堆块<br>FD = P-&gt;fd<span class="hljs-comment">;</span><br>BK = P-&gt;bk<span class="hljs-comment">;</span><br>FD-&gt;bk = BK<span class="hljs-comment">;  // 关键步骤：写入任意地址</span><br>BK-&gt;fd = FD<span class="hljs-comment">;  // 关键步骤：写入任意地址</span><br></code></pre></td></tr></table></figure>
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<p>unlink前：</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1742917802270.png" srcset="/img/loading.gif" lazyload alt="前"></p>
+<p>unlink后：</p>
+<p><img src="/1742917834909.png" srcset="/img/loading.gif" lazyload alt="后"></p>
+<p>这样就实现了内存块P的脱链</p>
+<h2 id="利用的源码"><a href="#利用的源码" class="headerlink" title="利用的源码"></a>利用的源码</h2><p>（只截取了一小部分）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> unlink(AV, P, BK, FD) &#123;                                            </span><br>    FD = P-&gt;fd;								      <br>    BK = P-&gt;bk;								      <br>    <span class="hljs-keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, <span class="hljs-number">0</span>))		      <br>      malloc_printerr (check_action, <span class="hljs-string">&quot;corrupted double-linked list&quot;</span>, P, AV);  <br>      <span class="hljs-comment">//检查，如果FD-&gt;bk没指向p或BK-&gt;fd没指向p就不会unlink</span><br>    <span class="hljs-keyword">else</span> &#123;								      <br>        FD-&gt;bk = BK;							      <br>        BK-&gt;fd = FD;<br></code></pre></td></tr></table></figure>
+
 
                 
               </div>
