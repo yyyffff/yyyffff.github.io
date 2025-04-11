@@ -36,7 +36,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1744300551204.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1744390744972.png">
 <meta property="article:published_time" content="2025-03-19T08:14:20.000Z">
-<meta property="article:modified_time" content="2025-04-11T17:38:31.539Z">
+<meta property="article:modified_time" content="2025-04-11T17:42:57.039Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1742917802270.png">
@@ -245,7 +245,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          4.7k 字
+          4.9k 字
         
       </span>
     
@@ -256,7 +256,7 @@
         
         
         
-          40 分钟
+          41 分钟
         
       </span>
     
@@ -638,6 +638,14 @@
 <p>74行，结合2.23源码进行分析</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//前情提要p2&lt;p3,p3要被放到largebin中,p2本就在largebin中</span><br>                      <span class="hljs-keyword">if</span> ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) size == (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) fwd-&gt;size)<br>                        <span class="hljs-comment">/* Always insert in the second position.  */</span><br>                        fwd = fwd-&gt;fd;<br>                      <span class="hljs-keyword">else</span><span class="hljs-comment">//进入这里的分支</span><br>                        &#123;<br>                          victim-&gt;fd_nextsize = fwd;<span class="hljs-comment">//vivtim是unsortedbin中，即将被放入largebin中的堆块(p3),bwd是最近被放进largebin中的chunk(p2)，这一句将p3-&gt;fd_nextsize=p2</span><br>                          victim-&gt;bk_nextsize = fwd-&gt;bk_nextsize;<span class="hljs-comment">//p2-&gt;bk_nextsize被我们设置成stack_var-0x20的地址，所以p3-&gt;bk_nextsize指向它,p3-&gt;bk_nextsize=p2-&gt;bk_nextsize=stack_var2-0x20</span><br>                          fwd-&gt;bk_nextsize = victim;<span class="hljs-comment">//p2-&gt;bk_nextsize指向p3</span><br>                          victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;<span class="hljs-comment">//将stack_var2-0x20-&gt;fd_nextsize，也就是stack_var2的地址，将其变成p3头指针</span><br>                        &#125;<br>                      bck = fwd-&gt;bk;<span class="hljs-comment">//等价于(fwd-bk)-&gt;fd=victim 也就是stack_var1-0x10-&gt;fd=victim,修改了var1的值，流程走完，利用完毕!!</span><br>                    &#125;<br>                &#125;<br>              <span class="hljs-keyword">else</span><br>                victim-&gt;fd_nextsize = victim-&gt;bk_nextsize = victim;<br>            &#125;<br></code></pre></td></tr></table></figure>
 
+<h2 id="总结-4"><a href="#总结-4" class="headerlink" title="总结"></a>总结</h2><p>主要利用两个chunk，大的p3，小的p2，通过伪造<code>p2-&gt;bk,p2-&gt;bk_nextsize</code>，分别指向<code>target-0x10,target-0x20</code>放到largebin里(在此之前largebin最好为空)，而大堆块malloc后进入largebin，<strong>实现将p3头指针赋值给target1,target2</strong></p>
+<p>how2heap 中也说了，large bin attack 是未来更深入的利用。现在我们来总结一下利用的条件：</p>
+<ul>
+<li>可以修改一个 large bin chunk 的 data</li>
+<li>从 unsorted bin 中来的 large bin chunk 要紧跟在被构造过的 chunk 的后面</li>
+<li>通过 large bin attack 可以辅助 Tcache Stash Unlink+ 攻击</li>
+<li>可以修改 _IO_list_all 便于伪造 _IO_FILE 结构体进行 FSOP。</li>
+</ul>
 
                 
               </div>
