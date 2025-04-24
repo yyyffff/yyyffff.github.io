@@ -29,8 +29,12 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1744274250663.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1744274955782.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1744607846230.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745213483114.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745298210863.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412561491.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412627477.png">
 <meta property="article:published_time" content="2025-03-19T08:22:26.000Z">
-<meta property="article:modified_time" content="2025-04-16T11:03:27.200Z">
+<meta property="article:modified_time" content="2025-04-24T08:30:18.628Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1744274250663.png">
@@ -239,7 +243,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          7.2k 字
+          8.2k 字
         
       </span>
     
@@ -250,7 +254,7 @@
         
         
         
-          60 分钟
+          69 分钟
         
       </span>
     
@@ -800,6 +804,80 @@
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">base</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-type">int</span> a;<br>	<span class="hljs-built_in">base</span>()<br>	&#123;<br>		a = <span class="hljs-number">100</span>;<br>	&#125;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">son</span> :<span class="hljs-keyword">public</span> base<br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-type">int</span> a;<br>	<span class="hljs-built_in">son</span>()<br>	&#123;<br>		a = <span class="hljs-number">200</span>;<br>	&#125;<br>&#125;;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test01</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	son s;<br>	<span class="hljs-comment">//访问son下的a</span><br>	cout &lt;&lt; <span class="hljs-string">&quot;son下的a=&quot;</span> &lt;&lt; s.a &lt;&lt; endl;<br>	<span class="hljs-comment">//访问base的a</span><br>	cout &lt;&lt; <span class="hljs-string">&quot;base下的a=&quot;</span> &lt;&lt; s.base::a &lt;&lt; endl;<br>&#125;<br></code></pre></td></tr></table></figure>
 
 <p>函数同理</p>
+<h1 id="多态"><a href="#多态" class="headerlink" title="多态"></a>多态</h1><p>C++面向对象三大特性之一</p>
+<h2 id="多态基本概念"><a href="#多态基本概念" class="headerlink" title="多态基本概念"></a>多态基本概念</h2><p>分为两类</p>
+<ul>
+<li>静态多态：函数重载 运算符重载属于静态多态，复用函数名</li>
+<li>动态多态：派生类和虚函数实现运行时的多态</li>
+</ul>
+<p>区别：</p>
+<ul>
+<li>静态多态的函数地址早绑定，编译阶段确定函数地址</li>
+<li>动态多态的函数地址晚绑定，允许阶段确定函数地址</li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">animal</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">speak</span><span class="hljs-params">()</span></span><br><span class="hljs-function">	</span>&#123;<br>		cout&lt;&lt;<span class="hljs-string">&quot;animal说话&quot;</span>&lt;&lt;endl;<br>	&#125;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">cat</span>:<span class="hljs-keyword">public</span> animal<br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">speak</span><span class="hljs-params">()</span></span><br><span class="hljs-function">	</span>&#123;<br>		cout&lt;&lt;<span class="hljs-string">&quot;cat说话&quot;</span>&lt;&lt;endl;<br>	&#125;<br>&#125;;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">dospeak</span><span class="hljs-params">(animal&amp; ani)</span></span><br><span class="hljs-function"></span>&#123;<br>	ani.<span class="hljs-built_in">speak</span>();<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test01</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	cat c;<br>	<span class="hljs-built_in">dospeak</span>(c);<span class="hljs-comment">//父子之间不用强制类型转换，父类能直接用子类的引用或者指针</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745213483114.png" srcset="/img/loading.gif" lazyload></p>
+<p>地址早绑定，编译阶段就确定了函数的地址，无论穿什么参数，都会执行<code>ani.speak()</code>，</p>
+<p>如果要执行cat说话，地址就<strong>不能早绑定</strong>，需要在<strong>运行阶段绑定</strong>，也就是<strong>晚绑定</strong></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">animal</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>     <span class="hljs-comment">//虚函数，实现地址晚绑定</span><br>	<span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">speak</span><span class="hljs-params">()</span></span><br><span class="hljs-function">	</span>&#123;<br>		cout&lt;&lt;<span class="hljs-string">&quot;animal说话&quot;</span>&lt;&lt;endl;<br>	&#125;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">cat</span>:<span class="hljs-keyword">public</span> animal<br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">speak</span><span class="hljs-params">()</span></span><br><span class="hljs-function">	</span>&#123;<br>		cout&lt;&lt;<span class="hljs-string">&quot;cat说话&quot;</span>&lt;&lt;endl;<br>	&#125;<br>&#125;;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">dospeak</span><span class="hljs-params">(animal&amp; ani)</span></span><br><span class="hljs-function"></span>&#123;<br>	ani.<span class="hljs-built_in">speak</span>();<br>&#125;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test01</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	cat c;<br>	<span class="hljs-built_in">dospeak</span>(c);<span class="hljs-comment">//父子之间不用强制类型转换，父类能直接用子类的引用或者指针</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745298210863.png" srcset="/img/loading.gif" lazyload></p>
+<p>动态多态的条件：</p>
+<ul>
+<li>有继承关系</li>
+<li>子类重写父类的虚函数<ul>
+<li>重写：函数返回值类型 函数名 参数列表完全相同</li>
+</ul>
+</li>
+</ul>
+<p>动态多态的使用：</p>
+<ul>
+<li>父类的指针或者引用指向子类的对象</li>
+</ul>
+<h2 id="多态的本质"><a href="#多态的本质" class="headerlink" title="多态的本质"></a>多态的本质</h2><ul>
+<li>当父类使用virtual关键字创建虚函数的时候，其内部会有一个vfptr(virtual function prt)指针父类的虚函数表，这个时候父类的虚函数表中会有一个地址：&amp;animal::speak</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412561491.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>当子类继承父类的时候会继承父类的vfptr指针，指向子类的虚函数表，但是当子类重写父类的虚函数的时候，会将自身的虚函数表中的地址给替换掉，替换成：&amp;cat::speak，这样就可以调用指向cat::speak的指针</li>
+</ul>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412627477.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="案例1：计算器类"><a href="#案例1：计算器类" class="headerlink" title="案例1：计算器类"></a>案例1：计算器类</h2><p>案例描述：分别利用普通写法和多态技术，实现两个操作数进行运算的计算机类</p>
+<p>多态优点：</p>
+<ul>
+<li>代码组织结构清晰</li>
+<li>可读性强</li>
+<li>利于前期和后期的扩展和维护</li>
+</ul>
+<p>普通：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">cac</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-type">int</span> n1;<br>	<span class="hljs-type">int</span> n2;<br>	<span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getresult</span><span class="hljs-params">(string oper)</span></span><br><span class="hljs-function">	</span>&#123;<br><br>		<span class="hljs-keyword">if</span> (oper == <span class="hljs-string">&quot;+&quot;</span>)<br>			<span class="hljs-keyword">return</span> n1 + n2;<br>		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (oper == <span class="hljs-string">&quot;-&quot;</span>)<br>			<span class="hljs-keyword">return</span> n1 - n2;<br>		<span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (oper == <span class="hljs-string">&quot;*&quot;</span>)<br>			<span class="hljs-keyword">return</span> n1 * n2;<br>		<span class="hljs-comment">//如果要扩展新功能，需要修改源码</span><br>		<span class="hljs-comment">//在真实开发中，提倡开闭原则：对扩展进行开放，对修改进行关闭</span><br>	&#125;<br>&#125;;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test01</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>	cac c;<br>	c.n1 = <span class="hljs-number">10</span>;<br>	c.n2 = <span class="hljs-number">10</span>;<br>	cout &lt;&lt; c.<span class="hljs-built_in">getresult</span>(<span class="hljs-string">&quot;+&quot;</span>) &lt;&lt; endl;<br>	cout &lt;&lt; c.<span class="hljs-built_in">getresult</span>(<span class="hljs-string">&quot;-&quot;</span>) &lt;&lt; endl;<br>	cout &lt;&lt; c.<span class="hljs-built_in">getresult</span>(<span class="hljs-string">&quot;*&quot;</span>) &lt;&lt; endl;<br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>多态：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">basecac</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">int</span> <span class="hljs-title">getresult</span><span class="hljs-params">()</span></span><br><span class="hljs-function">	</span>&#123;<br>		<span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>	&#125;<br>	<span class="hljs-type">int</span> n1;<br>	<span class="hljs-type">int</span> n2;<br>&#125;;<br><span class="hljs-comment">//加法类</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">addcac</span>:<span class="hljs-keyword">public</span> basecac<br>&#123;<br><span class="hljs-keyword">public</span>:<br>     <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getresult</span><span class="hljs-params">()</span></span><br><span class="hljs-function">     </span>&#123;<br>          <span class="hljs-keyword">return</span> n1+n2;<br>     &#125;<br>&#125;;<br><span class="hljs-comment">//减法类</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">jfcac</span>:<span class="hljs-keyword">public</span> basecac<br>&#123;<br><span class="hljs-keyword">public</span>:<br>     <span class="hljs-function"><span class="hljs-type">int</span> <span class="hljs-title">getresult</span><span class="hljs-params">()</span></span><br><span class="hljs-function">     </span>&#123;<br>          <span class="hljs-keyword">return</span> n1-n2;<br>     &#125;<br>&#125;;<br><span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">test01</span><span class="hljs-params">()</span></span><br><span class="hljs-function"></span>&#123;<br>     basecac *a=<span class="hljs-keyword">new</span> addcac;<span class="hljs-comment">//用父类指针指向子类对象，发生多态</span><br>     basecac *b=<span class="hljs-keyword">new</span> jfcac;<br>     a-&gt;n1=<span class="hljs-number">10</span>;<br>     a-&gt;n2=<span class="hljs-number">10</span>;<br>     b-&gt;n1=<span class="hljs-number">20</span>;<br>     b-&gt;n2=<span class="hljs-number">10</span>;<br>     cout&lt;&lt;a-&gt;<span class="hljs-built_in">getresult</span>()&lt;&lt;endl;<br>     cout&lt;&lt;b-&gt;<span class="hljs-built_in">getresult</span>()&lt;&lt;endl;<br>     <span class="hljs-comment">//用完后堆区记得销毁</span><br>     <span class="hljs-keyword">delete</span> a;<br>     <span class="hljs-keyword">delete</span> b;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>可见优点：</p>
+<ul>
+<li>组织结构清晰</li>
+<li>可读性强</li>
+<li>便于前期和后期的扩展的修改</li>
+</ul>
+<blockquote>
+<p>总结：C++开发中提倡利用多态设计程序架构，其优点很多</p>
+</blockquote>
+<h2 id="纯虚函数和抽象类"><a href="#纯虚函数和抽象类" class="headerlink" title="纯虚函数和抽象类"></a>纯虚函数和抽象类</h2><p>在多态中，通常父类中的虚函数的实现是毫无意义的，主要都是在调用子类重写的内容</p>
+<p>因此可以将虚函数改成纯虚函数</p>
+<p>语法：<code>virtual 返回值类型 函数名 (参数列表)=0</code></p>
+<p>当类中有一个纯虚函数，这个类也就称为<strong>抽象类</strong></p>
+<p>抽象类特点：</p>
+<ul>
+<li><strong>无法实例化对象</strong></li>
+<li><strong>子类必须要重写抽象类的纯虚函数，否则这个子类也属于抽象类</strong></li>
+</ul>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-keyword">class</span> <span class="hljs-title class_">base</span><br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-function"><span class="hljs-keyword">virtual</span> <span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">()</span></span>=<span class="hljs-number">0</span>;<br>&#125;;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">son</span>:<span class="hljs-keyword">public</span> base<br>&#123;<br><span class="hljs-keyword">public</span>:<br>	<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">func</span><span class="hljs-params">()</span></span>&#123;&#125;<span class="hljs-comment">//子类必须要重写父类中的纯虚函数</span><br>&#125;;<br></code></pre></td></tr></table></figure>
+
 
                 
               </div>
