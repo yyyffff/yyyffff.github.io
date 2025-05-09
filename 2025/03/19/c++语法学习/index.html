@@ -34,7 +34,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412561491.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412627477.png">
 <meta property="article:published_time" content="2025-03-19T08:22:26.000Z">
-<meta property="article:modified_time" content="2025-05-08T16:34:38.029Z">
+<meta property="article:modified_time" content="2025-05-09T07:19:39.390Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1744274250663.png">
@@ -243,7 +243,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          9.9k 字
+          10k 字
         
       </span>
     
@@ -254,7 +254,7 @@
         
         
         
-          83 分钟
+          86 分钟
         
       </span>
     
@@ -905,6 +905,20 @@
 <ul>
 <li>答案为T</li>
 </ul>
+<h3 id="0x003"><a href="#0x003" class="headerlink" title="0x003"></a>0x003</h3><p>若重载为友元函数，函数定义格式如下：</p>
+<p>&lt;类型&gt;operator&lt;运算符&gt;（&lt;参数列表&gt;）</p>
+<p>{</p>
+<p>&lt;函数体&gt;</p>
+<p>}  </p>
+<p>T    F</p>
+<ul>
+<li>答案为F</li>
+</ul>
+<h3 id="0x004"><a href="#0x004" class="headerlink" title="0x004"></a>0x004</h3><p>对每个可重载的运算符来讲，它既可以重载为友元函数，又可以重载为成员函数，还可以重载为非成员函数。  </p>
+<p>T     F</p>
+<ul>
+<li>答案为F，有些运算符必须要用全局函数来重载，比如说左移（&lt;&lt;）</li>
+</ul>
 <h2 id="选择"><a href="#选择" class="headerlink" title="选择"></a>选择</h2><h3 id="0x001-1"><a href="#0x001-1" class="headerlink" title="0x001"></a>0x001</h3><p>执行以下的程序片段，将输出几个数字？</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">for</span>(i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">3</span>;i++);<br><br>       <span class="hljs-built_in">cout</span>&lt;&lt;i;<br></code></pre></td></tr></table></figure>
 
@@ -923,12 +937,12 @@
 <ul>
 <li>答案为A，定义的数组是两行三列的，而给出的数据是三行两列的</li>
 </ul>
-<h3 id="0x003"><a href="#0x003" class="headerlink" title="0x003"></a>0x003</h3><p>设变量定义为 <code>int a[2]=&#123;1,3&#125;, *p=&amp;a[0]+1;</code>，则<code>*p</code>的值是(       )。</p>
+<h3 id="0x003-1"><a href="#0x003-1" class="headerlink" title="0x003"></a>0x003</h3><p>设变量定义为 <code>int a[2]=&#123;1,3&#125;, *p=&amp;a[0]+1;</code>，则<code>*p</code>的值是(       )。</p>
 <p>A.&amp;a[0]+1B.2C.4D.3</p>
 <ul>
 <li>答案为D，*p代表地址上的值</li>
 </ul>
-<h3 id="0x004"><a href="#0x004" class="headerlink" title="0x004"></a>0x004</h3><p>对类的构造函数和析构函数描述正确的是( )。</p>
+<h3 id="0x004-1"><a href="#0x004-1" class="headerlink" title="0x004"></a>0x004</h3><p>对类的构造函数和析构函数描述正确的是( )。</p>
 <p>A.构造函数不能重载，析构函数也不能重裁</p>
 <p>B.构造函数不能重载，析构函数可以重载</p>
 <p>C.构造函数可以重载，析构函数不能重载</p>
@@ -969,6 +983,27 @@
 <p>D.不能有基本数据类型</p>
 <ul>
 <li>答案</li>
+</ul>
+<h3 id="0x009"><a href="#0x009" class="headerlink" title="0x009"></a>0x009</h3><p>若需要为xv类重载乘法运算符,运算结果为xv类型,在将其声明为类的成员函数时,下列原型声明正确的是_________。</p>
+<p>A.<code>xv operator*(xv);</code></p>
+<p>B.<code>operator*(xv);</code></p>
+<p>C.<code>xv*(xv);*</code></p>
+<p>D.<code>xv operator*(xv,xv);</code></p>
+<ul>
+<li>答案为A</li>
+</ul>
+<h3 id="0x00A"><a href="#0x00A" class="headerlink" title="0x00A"></a>0x00A</h3><p>继承机制的作用是</p>
+<p>A.数据封装B.数据抽象C.信息隐藏D.定义新类</p>
+<ul>
+<li>答案为D</li>
+</ul>
+<h3 id="0x00B"><a href="#0x00B" class="headerlink" title="0x00B"></a>0x00B</h3><p>一个类的私有成员</p>
+<p>A.只能被该类的成员函数和友元函数访问</p>
+<p>B.以上答案都不对</p>
+<p>C.只能被该类的成员函数访问</p>
+<p>D.只能被该类的成员函数、友元函数和派生类访问</p>
+<ul>
+<li>答案为</li>
 </ul>
 <h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h2 id="程序"><a href="#程序" class="headerlink" title="程序"></a>程序</h2><h3 id="0x1"><a href="#0x1" class="headerlink" title="0x1"></a>0x1</h3><p><strong>R7-1 定义类模板实现2个数的算术运算</strong></p>
 <p>分数 20</p>
