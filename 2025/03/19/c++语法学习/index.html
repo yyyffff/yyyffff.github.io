@@ -34,7 +34,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412561491.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1745412627477.png">
 <meta property="article:published_time" content="2025-03-19T08:22:26.000Z">
-<meta property="article:modified_time" content="2025-05-09T07:19:39.390Z">
+<meta property="article:modified_time" content="2025-05-09T07:29:33.901Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E8%AF%AD%E6%B3%95%E5%AD%A6%E4%B9%A0/1744274250663.png">
@@ -254,7 +254,7 @@
         
         
         
-          86 分钟
+          87 分钟
         
       </span>
     
@@ -919,6 +919,26 @@
 <ul>
 <li>答案为F，有些运算符必须要用全局函数来重载，比如说左移（&lt;&lt;）</li>
 </ul>
+<h3 id="0x005"><a href="#0x005" class="headerlink" title="0x005"></a>0x005</h3><p>重定义虚函数的派生类必须是公有继承的。  </p>
+<p>T     F</p>
+<ul>
+<li>T</li>
+</ul>
+<h3 id="0x006"><a href="#0x006" class="headerlink" title="0x006"></a>0x006</h3><p>如果一个类的函数全部都是纯虚函数，则这个类不能有自己类的实现（包括引用和指针），只能通过派生类继承实现。</p>
+<p>T     F</p>
+<ul>
+<li>F</li>
+</ul>
+<h3 id="0x007"><a href="#0x007" class="headerlink" title="0x007"></a>0x007</h3><p>虚函数既可以在函数说明时定义，也可以在函数实现时定义。</p>
+<p>T    F</p>
+<ul>
+<li>F</li>
+</ul>
+<h3 id="0x008"><a href="#0x008" class="headerlink" title="0x008"></a>0x008</h3><p>含有纯虚函数的类是不可以用来创建对象的，因为它是虚基类。 </p>
+<p>T    F</p>
+<ul>
+<li>F，是抽象类</li>
+</ul>
 <h2 id="选择"><a href="#选择" class="headerlink" title="选择"></a>选择</h2><h3 id="0x001-1"><a href="#0x001-1" class="headerlink" title="0x001"></a>0x001</h3><p>执行以下的程序片段，将输出几个数字？</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">for</span>(i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">3</span>;i++);<br><br>       <span class="hljs-built_in">cout</span>&lt;&lt;i;<br></code></pre></td></tr></table></figure>
 
@@ -950,7 +970,7 @@
 <ul>
 <li>答案为C</li>
 </ul>
-<h3 id="0x005"><a href="#0x005" class="headerlink" title="0x005"></a>0x005</h3><p>下列程序的运行结果是（）。</p>
+<h3 id="0x005-1"><a href="#0x005-1" class="headerlink" title="0x005"></a>0x005</h3><p>下列程序的运行结果是（）。</p>
 <figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs elixir">int i;<br><span class="hljs-keyword">for</span>(i=<span class="hljs-number">0</span>;i&lt;<span class="hljs-number">3</span>;i++)<br>   switch(i)<br>   &#123;<br>        <span class="hljs-keyword">case</span> <span class="hljs-number">1</span><span class="hljs-symbol">:cout&lt;&lt;i</span>;<br>        <span class="hljs-keyword">case</span> <span class="hljs-number">2</span><span class="hljs-symbol">:cout&lt;&lt;i</span>;<br>        <span class="hljs-symbol">default:</span>cout&lt;&lt;i;<br>   &#125;<br></code></pre></td></tr></table></figure>
 
 <p>A.012</p>
@@ -960,7 +980,7 @@
 <ul>
 <li>答案为B，因为case里面没有break</li>
 </ul>
-<h3 id="0x006"><a href="#0x006" class="headerlink" title="0x006"></a>0x006</h3><p>一个函数为<code>void f(int x, char y = &#39;a&#39;)</code>，另一个函数为<code>void f(int)</code>，则它们_</p>
+<h3 id="0x006-1"><a href="#0x006-1" class="headerlink" title="0x006"></a>0x006</h3><p>一个函数为<code>void f(int x, char y = &#39;a&#39;)</code>，另一个函数为<code>void f(int)</code>，则它们_</p>
 <p>A.不能在同一程序块中定义</p>
 <p>B.可以在同一个程序块中定义，但不可以重载</p>
 <p>C.以上说法均不正确</p>
@@ -968,7 +988,7 @@
 <ul>
 <li>答案为D</li>
 </ul>
-<h3 id="0x007"><a href="#0x007" class="headerlink" title="0x007"></a>0x007</h3><p>关于类模板，描述错误的是。</p>
+<h3 id="0x007-1"><a href="#0x007-1" class="headerlink" title="0x007"></a>0x007</h3><p>关于类模板，描述错误的是。</p>
 <p>A.一个普通基类不能派生类模板</p>
 <p>B.类模板可以从普通类派生，也可以从类模板派生</p>
 <p>C.根据建立对象时的实际数据类型，编译器把类模板实例化为模板类</p>
@@ -976,7 +996,7 @@
 <ul>
 <li>答案A</li>
 </ul>
-<h3 id="0x008"><a href="#0x008" class="headerlink" title="0x008"></a>0x008</h3><p>类模板的参数错误的说法是：</p>
+<h3 id="0x008-1"><a href="#0x008-1" class="headerlink" title="0x008"></a>0x008</h3><p>类模板的参数错误的说法是：</p>
 <p>A.可以有多个</p>
 <p>B.可以有0个</p>
 <p>C.参数不能给初值</p>
@@ -1003,7 +1023,7 @@
 <p>C.只能被该类的成员函数访问</p>
 <p>D.只能被该类的成员函数、友元函数和派生类访问</p>
 <ul>
-<li>答案为</li>
+<li>答案为A</li>
 </ul>
 <h2 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h2><h2 id="程序"><a href="#程序" class="headerlink" title="程序"></a>程序</h2><h3 id="0x1"><a href="#0x1" class="headerlink" title="0x1"></a>0x1</h3><p><strong>R7-1 定义类模板实现2个数的算术运算</strong></p>
 <p>分数 20</p>
