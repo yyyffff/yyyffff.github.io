@@ -26,12 +26,13 @@
 <meta property="og:site_name" content="yyyffff">
 <meta property="og:description" content="更换对应的libc和ld确定给的libc.so.6版本 1strings libc.so.6 | grep libc   在glibc-all-in-one中下载对应的版本 12cat ~cat glibc-all-in-one  列出版本列表 1cat list  下载 1.&#x2F;download 对应版本  patchelf到程序中 12patchelf --set-interpreter ~&#x2F;g">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yyyffff.github.io/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
+<meta property="og:image" content="http://yyyffff.github.io/1747064315922.png">
+<meta property="og:image" content="http://yyyffff.github.io/1747661283748.png">
 <meta property="article:published_time" content="2025-05-12T15:36:30.000Z">
-<meta property="article:modified_time" content="2025-05-18T16:19:38.627Z">
+<meta property="article:modified_time" content="2025-05-19T13:28:14.989Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://yyyffff.github.io/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
+<meta name="twitter:image" content="http://yyyffff.github.io/1747064315922.png">
   
   
   
@@ -237,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          355 字
+          608 字
         
       </span>
     
@@ -248,7 +249,7 @@
         
         
         
-          3 分钟
+          6 分钟
         
       </span>
     
@@ -302,7 +303,7 @@
                 <h1 id="更换对应的libc和ld"><a href="#更换对应的libc和ld" class="headerlink" title="更换对应的libc和ld"></a>更换对应的libc和ld</h1><p>确定给的libc.so.6版本</p>
 <figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs vim">strings libc.<span class="hljs-keyword">so</span>.<span class="hljs-number">6</span> | <span class="hljs-keyword">grep</span> libc<br></code></pre></td></tr></table></figure>
 
-<p><img src="/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png" srcset="/img/loading.gif" lazyload alt=" "></p>
+<p><img src="/1747064315922.png" srcset="/img/loading.gif" lazyload alt=" "></p>
 <p>在glibc-all-in-one中下载对应的版本</p>
 <figure class="highlight stata"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stata"><span class="hljs-keyword">cat</span> ~<br><span class="hljs-keyword">cat</span> glibc-all-<span class="hljs-keyword">in</span>-<span class="hljs-keyword">one</span><br></code></pre></td></tr></table></figure>
 
@@ -341,7 +342,84 @@
 <p>将文件夹文件移动到桌面</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">mv</span> example ~/桌面<br></code></pre></td></tr></table></figure>
 
-<h1 id="ROP技巧"><a href="#ROP技巧" class="headerlink" title="ROP技巧"></a>ROP技巧</h1><h2 id="控制寄存器的值"><a href="#控制寄存器的值" class="headerlink" title="控制寄存器的值"></a>控制寄存器的值</h2><h2 id="利用寄存器写入-bin-sh"><a href="#利用寄存器写入-bin-sh" class="headerlink" title="利用寄存器写入&#x2F;bin&#x2F;sh"></a>利用寄存器写入&#x2F;bin&#x2F;sh</h2><h1 id="gdb指令大全"><a href="#gdb指令大全" class="headerlink" title="gdb指令大全"></a>gdb指令大全</h1>
+<h1 id="gadgets"><a href="#gadgets" class="headerlink" title="gadgets"></a>gadgets</h1><h2 id="控制寄存器的值"><a href="#控制寄存器的值" class="headerlink" title="控制寄存器的值"></a>控制寄存器的值</h2><ul>
+<li>直接控制<ul>
+<li>能直接找到类似<code>pop rdi; ret;</code>的<code>gdagets</code>最好，这样就能直接控制</li>
+</ul>
+</li>
+<li>间接控制<ul>
+<li>有时候找不到上面的<code>gadgets</code>，但是能找到<code>mov rdi dcx; ret</code>，<code>rcx</code>可控时，也可以控制<code>rdi</code>的值</li>
+</ul>
+</li>
+</ul>
+<h2 id="利用寄存器写入-bin-sh"><a href="#利用寄存器写入-bin-sh" class="headerlink" title="利用寄存器写入&#x2F;bin&#x2F;sh"></a>利用寄存器写入&#x2F;bin&#x2F;sh</h2><p>存在<code>mov [rax],rcx; ret;</code>类似的<code>gadgets</code>，在<code>rax</code>与<code>rcx</code>都可控的情况下，控制<code>rcx</code>为<code>/bin/sh\x00</code>，·为可写入且已知的地址，这样就可以将binsh写入rax的地址之中了</p>
+<h1 id="gdb指令大全"><a href="#gdb指令大全" class="headerlink" title="gdb指令大全"></a>gdb指令大全</h1><table>
+<thead>
+<tr>
+<th align="left">命令</th>
+<th>作用</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">r</td>
+<td>运行</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">b 函数名&#x2F;*地址</td>
+<td>下断点</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">n</td>
+<td>单步进行</td>
+<td align="left">汇编代码单步，不进入函数内部</td>
+</tr>
+<tr>
+<td align="left">s</td>
+<td>单步</td>
+<td align="left">会进入函数内部</td>
+</tr>
+<tr>
+<td align="left">finish</td>
+<td>跳出函数</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">c</td>
+<td>继续运行</td>
+<td align="left">到下个断点处</td>
+</tr>
+<tr>
+<td align="left">tele 地址(0x1234)</td>
+<td>查看地址上的信息</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">stack</td>
+<td>查看栈信息</td>
+<td align="left">可用stack 数字 来确定查看多少条信息</td>
+</tr>
+<tr>
+<td align="left">vmmap</td>
+<td>查看各种段地址信息及权限</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">p 函数名</td>
+<td>查看该函数地址</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">x&#x2F;格式 地址</td>
+<td>查看地址上信息</td>
+<td align="left">常用x&#x2F;20gx 20表示显示20条信息，g是表示8字节，x表示16进制</td>
+</tr>
+</tbody></table>
+<p>tele：</p>
+<p><img src="/1747661283748.png" srcset="/img/loading.gif" lazyload alt="tele"></p>
+
                 
               </div>
             
