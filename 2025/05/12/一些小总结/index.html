@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E6%80%BB%E7%BB%93/1747661283748.png">
 <meta property="article:published_time" content="2025-05-12T15:36:30.000Z">
-<meta property="article:modified_time" content="2025-05-19T14:26:15.089Z">
+<meta property="article:modified_time" content="2025-05-20T16:40:46.193Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
@@ -238,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          608 字
+          664 字
         
       </span>
     
@@ -420,6 +420,7 @@
 </tbody></table>
 <p>tele：</p>
 <p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E6%80%BB%E7%BB%93/1747661283748.png" srcset="/img/loading.gif" lazyload alt="tele"></p>
+<h1 id="sendline与send"><a href="#sendline与send" class="headerlink" title="sendline与send"></a>sendline与send</h1><p>当程序限制read在0x20字节时，而我们要输入的长度恰好在0x20，<strong>一定要用send而不是sendline</strong>，否则多余的<code>\n</code>可能会残留在缓冲区被下一个read读取&#x2F;(ㄒoㄒ)&#x2F;~~</p>
 
                 
               </div>
@@ -481,6 +482,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/2025/05/19/IO_FILE%20Exploit/" title="IO_FILE Exploit">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">IO_FILE Exploit</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
