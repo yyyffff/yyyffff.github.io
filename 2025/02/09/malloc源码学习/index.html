@@ -47,13 +47,13 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739689225241.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739699575792.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739699606500.png">
-<meta property="og:image" content="http://yyyffff.github.io/1739718475251.png">
-<meta property="og:image" content="http://yyyffff.github.io/1739718784433.png">
-<meta property="og:image" content="http://yyyffff.github.io/1739718820501.png">
-<meta property="og:image" content="http://yyyffff.github.io/1739720061537.png">
-<meta property="og:image" content="http://yyyffff.github.io/1739720458255.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739718475251.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739718784433.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739718820501.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739720061537.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739720458255.png">
 <meta property="article:published_time" content="2025-02-09T07:09:53.000Z">
-<meta property="article:modified_time" content="2025-05-18T05:03:48.897Z">
+<meta property="article:modified_time" content="2025-06-11T14:11:53.722Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739175742174.png">
@@ -506,12 +506,12 @@
 <li><p>可看作是small bins的前7部分的cache，SIZE_SZ为4&#x2F;8B，每个bin的chunk大小依次为16&#x2F;32，24&#x2F;48，…..</p>
 </li>
 <li><p>32为平台下分配的内存大小和chunk大小和fast bins对应关系如下</p>
-<p><img src="/1739718475251.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739718475251.png" srcset="/img/loading.gif" lazyload></p>
 <p>fast bins可看作LIFO的栈（last in,first out）</p>
-<p><img src="/1739718784433.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739718784433.png" srcset="/img/loading.gif" lazyload></p>
 </li>
 <li><p>根据fast bin的index获取fast bin的地址</p>
-<p><img src="/1739718820501.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739718820501.png" srcset="/img/loading.gif" lazyload></p>
 </li>
 <li><p>fastbin_index(sz)用于获得fast bin在fast bins数组中的index  </p>
 <ul>
@@ -519,13 +519,13 @@
 </ul>
 </li>
 </ul>
-<p><img src="/1739720061537.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739720061537.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>根据SIZE_SZ的不同大小，MAX_FAST_SIZE为80B或160B</li>
 <li>NFASTBINS为10（fast bins的数组大小）</li>
 <li>FASTBIN_CONSOLIDATION_THRESHOLD 用于检查，当释放的chunk与该chunk相邻chunk合并后大于64KB，认为内存碎片较多，需要将fast bins中所有chunk都合并，减少内存碎片对系统的影响</li>
 </ul>
-<p><img src="/1739720458255.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/loc%E6%BA%90%E7%A0%81%E5%AD%A6%E4%B9%A0/1739720458255.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
 <li>DEFAULT_MXFAST定义了默认fast bins中最大的chunk大小，SIZE_SZ为4&#x2F;8B，大小分别是64B&#x2F;128B</li>
 <li>set_max_fast(s)将全局变量global_max_fast<strong>设置</strong>为DEAFAULT_MXFAST</li>

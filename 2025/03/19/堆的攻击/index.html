@@ -37,7 +37,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1744390744972.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1745511150245.png">
 <meta property="article:published_time" content="2025-03-19T08:14:20.000Z">
-<meta property="article:modified_time" content="2025-05-18T16:57:01.773Z">
+<meta property="article:modified_time" content="2025-06-07T05:42:48.514Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%87%BB/1742917802270.png">
@@ -257,7 +257,7 @@
         
         
         
-          55 分钟
+          56 分钟
         
       </span>
     
@@ -614,6 +614,12 @@
 </ul>
 </li>
 </ul>
+<h2 id="总结-4"><a href="#总结-4" class="headerlink" title="总结"></a>总结</h2><p>通过控制<code>unsortedbin</code>里的空闲<code>chunk-&gt;bk</code>，来实现任意地址写</p>
+<p>操作：</p>
+<ul>
+<li>将<code>bk</code>修改成为<code>target_addr-0x10</code></li>
+<li>在取出<code>chunk</code>的时候，即可往<code>target_addr</code>处写入<code>unsortedbin</code>链表头的地址，也就是 <code>main_arena + 0x58</code>（glibc &lt; 2.26）或 <code>main_arena + 0x68</code>（glibc ≥ 2.26）</li>
+</ul>
 <h1 id="Large-Bin-Attack"><a href="#Large-Bin-Attack" class="headerlink" title="Large Bin Attack"></a>Large Bin Attack</h1><h2 id="原理-7"><a href="#原理-7" class="headerlink" title="原理"></a>原理</h2><p>主要利用chunk进入bin中的操作，在malloc时，遍历unsorted bin，对每一个chunk，若无法exact-fit分配（精准匹配分配）或不满足切割分配的要求，就会将chunk置入大小对应的bin中，<strong>而此过程缺乏对large bin跳表指针（fd_nextsize和bk_nextsize）的检查</strong></p>
 <p>2.29版本及以下，根据unsorted bin大小不同</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">fwd-&gt;fd-&gt;bk_nextsize = victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;<br>victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;<br></code></pre></td></tr></table></figure>
@@ -639,7 +645,7 @@
 <p>74行，结合2.23源码进行分析</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">//前情提要p2&lt;p3,p3要被放到largebin中,p2本就在largebin中</span><br>                      <span class="hljs-keyword">if</span> ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) size == (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) fwd-&gt;size)<br>                        <span class="hljs-comment">/* Always insert in the second position.  */</span><br>                        fwd = fwd-&gt;fd;<br>                      <span class="hljs-keyword">else</span><span class="hljs-comment">//进入这里的分支</span><br>                        &#123;<br>                          victim-&gt;fd_nextsize = fwd;<span class="hljs-comment">//vivtim是unsortedbin中，即将被放入largebin中的堆块(p3),bwd是最近被放进largebin中的chunk(p2)，这一句将p3-&gt;fd_nextsize=p2</span><br>                          victim-&gt;bk_nextsize = fwd-&gt;bk_nextsize;<span class="hljs-comment">//p2-&gt;bk_nextsize被我们设置成stack_var-0x20的地址，所以p3-&gt;bk_nextsize指向它,p3-&gt;bk_nextsize=p2-&gt;bk_nextsize=stack_var2-0x20</span><br>                          fwd-&gt;bk_nextsize = victim;<span class="hljs-comment">//p2-&gt;bk_nextsize指向p3</span><br>                          victim-&gt;bk_nextsize-&gt;fd_nextsize = victim;<span class="hljs-comment">//将stack_var2-0x20-&gt;fd_nextsize，也就是stack_var2的地址，将其变成p3头指针</span><br>                        &#125;<br>                      bck = fwd-&gt;bk;<span class="hljs-comment">//等价于(fwd-bk)-&gt;fd=victim 也就是stack_var1-0x10-&gt;fd=victim,修改了var1的值，流程走完，利用完毕!!</span><br>                    &#125;<br>                &#125;<br>              <span class="hljs-keyword">else</span><br>                victim-&gt;fd_nextsize = victim-&gt;bk_nextsize = victim;<br>            &#125;<br></code></pre></td></tr></table></figure>
 
-<h2 id="总结-4"><a href="#总结-4" class="headerlink" title="总结"></a>总结</h2><p>主要利用两个chunk，大的p3，小的p2，通过伪造<code>p2-&gt;bk,p2-&gt;bk_nextsize</code>，分别指向<code>target-0x10,target-0x20</code>放到largebin里(在此之前largebin最好为空)，而大堆块malloc后进入largebin，<strong>实现将p3头指针赋值给target1,target2</strong></p>
+<h2 id="总结-5"><a href="#总结-5" class="headerlink" title="总结"></a>总结</h2><p>主要利用两个chunk，大的p3，小的p2，通过伪造<code>p2-&gt;bk,p2-&gt;bk_nextsize</code>，分别指向<code>target-0x10,target-0x20</code>放到largebin里(在此之前largebin最好为空)，而大堆块malloc后进入largebin，<strong>实现将p3头指针赋值给target1,target2</strong></p>
 <p>how2heap 中也说了，large bin attack 是未来更深入的利用。现在我们来总结一下利用的条件：</p>
 <ul>
 <li>可以修改一个 large bin chunk 的 data</li>
@@ -681,7 +687,7 @@
 <h3 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h3><p><code>tcache</code>的<code>next</code>指针和<code>fd</code>指针在同一个位置</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">size_t</span> stack_var;<br><span class="hljs-type">intptr_t</span> *a = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">128</span>);<br><span class="hljs-built_in">free</span>(a);<br>a[<span class="hljs-number">0</span>] = (<span class="hljs-type">intptr_t</span>)&amp;stack_var;<br><span class="hljs-built_in">fprintf</span>(<span class="hljs-built_in">stderr</span>, <span class="hljs-string">&quot;1st malloc(128): %p\n&quot;</span>, <span class="hljs-built_in">malloc</span>(<span class="hljs-number">128</span>));<br><span class="hljs-type">intptr_t</span> *b = <span class="hljs-built_in">malloc</span>(<span class="hljs-number">128</span>);<br></code></pre></td></tr></table></figure>
 
-<h3 id="总结-5"><a href="#总结-5" class="headerlink" title="总结"></a>总结</h3><p>跟<code>fastbin</code>类似，将一个<code>free</code>在<code>tcache</code>中的块的<code>next</code>修改成目标地址，两次<code>free</code>就能得到目标地址的内存块</p>
+<h3 id="总结-6"><a href="#总结-6" class="headerlink" title="总结"></a>总结</h3><p>跟<code>fastbin</code>类似，将一个<code>free</code>在<code>tcache</code>中的块的<code>next</code>修改成目标地址，两次<code>free</code>就能得到目标地址的内存块</p>
 <h2 id="tcache-dup"><a href="#tcache-dup" class="headerlink" title="tcache dup"></a>tcache dup</h2><h3 id="原理-9"><a href="#原理-9" class="headerlink" title="原理"></a>原理</h3><p><code>tcache_put</code>的检查不严谨，大幅提高性能的同时安全性也下降了许多</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">static</span> __always_inline <span class="hljs-type">void</span><br><span class="hljs-title function_">tcache_put</span> <span class="hljs-params">(mchunkptr chunk, <span class="hljs-type">size_t</span> tc_idx)</span><br>&#123;<br>  tcache_entry *e = (tcache_entry *) chunk2mem (chunk);<br>  assert (tc_idx &lt; TCACHE_MAX_BINS);<br>  e-&gt;next = tcache-&gt;entries[tc_idx];<br>  tcache-&gt;entries[tc_idx] = e;<br>  ++(tcache-&gt;counts[tc_idx]);<br>&#125;<br></code></pre></td></tr></table></figure>
 
