@@ -283,7 +283,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2025/06/07/%E5%90%84%E7%A7%8D%20house%20of/" target="_self">
         <div>
-          House of Orange概述：在没有free存在的情况下创造free到unsortedbin中的空闲块
+          House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk
         </div>
       </a>
 

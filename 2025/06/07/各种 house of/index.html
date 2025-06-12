@@ -19,15 +19,15 @@
   <meta name="author" content="yyf">
   <meta name="keywords" content="">
   
-    <meta name="description" content="House of Orange概述：在没有free存在的情况下创造free到unsortedbin中的空闲块">
+    <meta name="description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:type" content="article">
 <meta property="og:title" content="各种 house of">
 <meta property="og:url" content="http://yyyffff.github.io/2025/06/07/%E5%90%84%E7%A7%8D%20house%20of/index.html">
 <meta property="og:site_name" content="yyyffff">
-<meta property="og:description" content="House of Orange概述：在没有free存在的情况下创造free到unsortedbin中的空闲块">
+<meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-06-09T07:32:41.198Z">
+<meta property="article:modified_time" content="2025-06-12T07:37:17.850Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          21 字
+          277 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          1 分钟
+          3 分钟
         
       </span>
     
@@ -297,7 +297,28 @@
             
               <div class="markdown-body">
                 
-                <h1 id="House-of-Orange"><a href="#House-of-Orange" class="headerlink" title="House of Orange"></a>House of Orange</h1><p>概述：在没有free存在的情况下创造free到unsortedbin中的空闲块</p>
+                <h1 id="House-of-Orange"><a href="#House-of-Orange" class="headerlink" title="House of Orange"></a>House of Orange</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>对<code>top chunk</code>进行利用，在没有<code>free</code>存在的情况下创造<code>free</code>到<code>unsortedbin</code>中的空闲块，从而得到<code>unsortedbin</code>地址，在进行后续操作即可获得<code>main_arena</code>地址等</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk出来</p>
+<p>glibc2.23：</p>
+<p>当其他bin都满足不了，topchunk也无法满足时</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs c">  <span class="hljs-comment">/* Record incoming configuration of top */</span><br><br>  old_top = av-&gt;top;<br>  old_size = chunksize (old_top);<br>  old_end = (<span class="hljs-type">char</span> *) (chunk_at_offset (old_top, old_size));<br><br>  brk = snd_brk = (<span class="hljs-type">char</span> *) (MORECORE_FAILURE);<br><br>  <span class="hljs-comment">/*</span><br><span class="hljs-comment">     If not the first time through, we require old_size to be</span><br><span class="hljs-comment">     at least MINSIZE and to have prev_inuse set.</span><br><span class="hljs-comment">   */</span><br><span class="hljs-comment">//下面都是需要通过的检查</span><br>  assert ((old_top == initial_top (av) &amp;&amp; old_size == <span class="hljs-number">0</span>) ||<br>          ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (old_size) &gt;= MINSIZE &amp;&amp;<br>           prev_inuse (old_top) &amp;&amp;<br>           ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) old_end &amp; (pagesize - <span class="hljs-number">1</span>)) == <span class="hljs-number">0</span>));<br><br>  <span class="hljs-comment">/* Precondition: not enough current space to satisfy nb request */</span><br>  assert ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (old_size) &lt; (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (nb + MINSIZE));<br></code></pre></td></tr></table></figure>
+
+<p>条件:</p>
+<ul>
+<li>申请的size不能大于mmap分配阈值，默认128k</li>
+<li>伪造size对齐的内存页</li>
+<li>伪造size要大于MINSIZE(0x10)</li>
+<li>伪造size要小于申请的chunk size+MINSIZE(0x10)</li>
+<li>伪造size的prev inuse为必须为1</li>
+</ul>
+<p>过程：</p>
+<ul>
+<li>修改top chunk的size</li>
+<li>申请一个大于top chunk的size<ul>
+<li>scanf函数会申请一个0x1000的块，如果调用scanf的话就不用我们自己申请了，scanf调用完top chunk就会进入unsortedbin</li>
+</ul>
+</li>
+</ul>
 
                 
               </div>
