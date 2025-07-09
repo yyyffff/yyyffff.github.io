@@ -19,21 +19,21 @@
   <meta name="author" content="yyf">
   <meta name="keywords" content="">
   
-    <meta name="description" content="yyyffff的个人博客">
+    <meta name="description" content="概述VM pwn题目通常是模拟一套虚拟机，对用户输入的opcode进行解析，模拟程序的执行 一般会有如下操作  初始化模拟的寄存器空间(reg) 初始化模拟的栈空间(stack) 初始化模拟的data段(data) 初始化模拟的opcode存储空间(text)  当用户输入指令后，该程序会根据自己设计的逻辑进行执行，这些空间全都是自己分配的而不是系统给的 [OGeek2019 Final]OVMo">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pwn">
+<meta property="og:title" content="VM pwn">
 <meta property="og:url" content="http://yyyffff.github.io/2025/07/09/VM%20pwn/index.html">
 <meta property="og:site_name" content="yyyffff">
-<meta property="og:description" content="yyyffff的个人博客">
+<meta property="og:description" content="概述VM pwn题目通常是模拟一套虚拟机，对用户输入的opcode进行解析，模拟程序的执行 一般会有如下操作  初始化模拟的寄存器空间(reg) 初始化模拟的栈空间(stack) 初始化模拟的data段(data) 初始化模拟的opcode存储空间(text)  当用户输入指令后，该程序会根据自己设计的逻辑进行执行，这些空间全都是自己分配的而不是系统给的 [OGeek2019 Final]OVMo">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-07-09T03:37:39.000Z">
-<meta property="article:modified_time" content="2025-07-09T03:37:39.391Z">
+<meta property="article:modified_time" content="2025-07-09T17:17:44.909Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
   
   
-  <title>pwn - yyyffff</title>
+  <title>VM pwn - yyyffff</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -212,7 +212,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="pwn"></span>
+            <span id="subtitle" data-typed-text="VM pwn"></span>
           
         </div>
 
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 字
+          335 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          1 分钟
+          3 分钟
         
       </span>
     
@@ -292,12 +292,106 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">pwn</h1>
+            <h1 id="seo-header">VM pwn</h1>
             
             
               <div class="markdown-body">
                 
-                
+                <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>VM pwn题目通常是模拟一套虚拟机，对用户输入的opcode进行解析，模拟程序的执行</p>
+<p>一般会有如下操作</p>
+<ul>
+<li>初始化模拟的寄存器空间(reg)</li>
+<li>初始化模拟的栈空间(stack)</li>
+<li>初始化模拟的data段(data)</li>
+<li>初始化模拟的opcode存储空间(text)</li>
+</ul>
+<p>当用户输入指令后，该程序会根据自己设计的逻辑进行执行，这些空间全都是自己分配的而不是系统给的</p>
+<h1 id="OGeek2019-Final-OVM"><a href="#OGeek2019-Final-OVM" class="headerlink" title="[OGeek2019 Final]OVM"></a>[OGeek2019 Final]OVM</h1><p>opcode格式</p>
+<p> 操作码 | 目标寄存器 （v4）| 操作数2寄存器 （v3）| 操作数1寄存器（v2） </p>
+<p>比如0x70020100</p>
+<p>翻译：</p>
+<ul>
+<li>0x70 加法</li>
+<li>v4：2</li>
+<li>v3：1</li>
+<li>v2：0</li>
+<li>操作：reg[2]&#x3D;reg[1]+reg[0]</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">操作码</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">0x70</td>
+<td>reg[v4] &#x3D; reg[v2] + reg[v3]</td>
+</tr>
+<tr>
+<td align="left">0xB0</td>
+<td>reg[v4] &#x3D; reg[v2] ^ reg[v3]</td>
+</tr>
+<tr>
+<td align="left">0xD0</td>
+<td>reg[v4] &#x3D; reg[v3] &gt;&gt; reg[v2]</td>
+</tr>
+<tr>
+<td align="left">0xE0</td>
+<td>if !sp 就exit</td>
+</tr>
+<tr>
+<td align="left">0xFF</td>
+<td>nop 打印寄存器</td>
+</tr>
+<tr>
+<td align="left">0xC0</td>
+<td>reg[v4] &#x3D; reg[v3] &lt;&lt; reg[v2]</td>
+</tr>
+<tr>
+<td align="left">0x90</td>
+<td>reg[v4] &#x3D; reg[v2] &amp; reg[v3]</td>
+</tr>
+<tr>
+<td align="left">0xA0</td>
+<td>reg[v4] &#x3D; reg[v2] | reg[v3]</td>
+</tr>
+<tr>
+<td align="left">0x80</td>
+<td>reg[v4] &#x3D; reg[v3] - reg[v2]</td>
+</tr>
+<tr>
+<td align="left">0x30</td>
+<td>reg[v4] &#x3D; memory[reg[v2]]</td>
+</tr>
+<tr>
+<td align="left">0x50(P)</td>
+<td>进栈</td>
+</tr>
+<tr>
+<td align="left">0x60</td>
+<td>出栈</td>
+</tr>
+<tr>
+<td align="left">0x40</td>
+<td>memory[reg[v2]] &#x3D; reg[v4]</td>
+</tr>
+<tr>
+<td align="left">0x10</td>
+<td>reg[v4] &#x3D; (unsigned __int8)a1（a1最低字节）</td>
+</tr>
+<tr>
+<td align="left">0x20</td>
+<td>reg[v4] &#x3D;((_BYTE)a1 &#x3D;&#x3D; 0)</td>
+</tr>
+</tbody></table>
+<p>大概逻辑：</p>
+<p>泄露stdder（数组下标负数）</p>
+<p>利用stdder和free_hook的偏移得到free_hook-8</p>
+<p>将freehook-8写入comment（也是数组的越界）</p>
+<p>然后打印寄存器，获取到libc</p>
+<p>最后写&#x2F;bin&#x2F;sh\x00和system_addr即可</p>
+
                 
               </div>
             
@@ -314,7 +408,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>pwn</div>
+      <div>VM pwn</div>
       <div>http://yyyffff.github.io/2025/07/09/VM pwn/</div>
     </div>
     <div class="license-meta">
