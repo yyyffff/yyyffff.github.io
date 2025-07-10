@@ -27,7 +27,7 @@
 <meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-07-09T16:24:54.145Z">
+<meta property="article:modified_time" content="2025-07-10T04:54:28.752Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          549 字
+          1.2k 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          5 分钟
+          11 分钟
         
       </span>
     
@@ -343,6 +343,45 @@
 <li>最后unlink将其放入了unsortedbin后需要将fd，bk改写为main_arena+88</li>
 </ul>
 <p>最后malloc就得到目标地址的堆块了</p>
+<h1 id="House-Of-Force"><a href="#House-Of-Force" class="headerlink" title="House Of Force"></a>House Of Force</h1><h2 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h2><p>利用篡改top chunk的size，来实现任意地址分配</p>
+<p>2.23-2.27</p>
+<h2 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h2><p>top chunk的分割机制（2.23）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c">victim = av-&gt;top;<span class="hljs-comment">//获取top chunk</span><br>size = chunksize (victim);<span class="hljs-comment">//获取top的大小</span><br><br><span class="hljs-keyword">if</span> ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (size) &gt;= (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (nb + MINSIZE))<span class="hljs-comment">//top chunk足够大</span><br>  &#123;<br>    remainder_size = size - nb;<span class="hljs-comment">//计算剩余</span><br>    remainder = chunk_at_offset (victim, nb);<span class="hljs-comment">//计算分割后指针</span><br>    av-&gt;top = remainder;<br>    set_head (victim, nb | PREV_INUSE |<br>              (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="hljs-number">0</span>));<br>    set_head (remainder, remainder_size | PREV_INUSE);<span class="hljs-comment">//设置剩余部分头部信息</span><br><br>    check_malloced_chunk (av, victim, nb);<br>    <span class="hljs-type">void</span> *p = chunk2mem (victim);<br>    alloc_perturb (p, bytes);<br>    <span class="hljs-keyword">return</span> p;<span class="hljs-comment">//返回分配的内存地址</span><br>  &#125;<br></code></pre></td></tr></table></figure>
+
+<p>要可以控制top chunk的size域</p>
+<p>要可以分配任意大小的堆块</p>
+<p>过程：</p>
+<ul>
+<li>首先溢出将top chunk的size变成-1，因为比较时会把size看成无符号数，这样-1就是一个极大数，可以通过所有检查</li>
+<li>然后分配一块空间，利用这块空间将top chunk推到目标地址附近，如果要推到高地址，就malloc(+)，推到低地址就malloc(-)，这块空间大小为<code>malloc_size = target_addr - top_chunk_addr - 2*sizeof(size_t);</code></li>
+<li>然后再malloc一次就可以得到目标地址的堆块了</li>
+</ul>
+<h1 id="House-of-Lore"><a href="#House-of-Lore" class="headerlink" title="House of Lore"></a>House of Lore</h1><h2 id="概述-3"><a href="#概述-3" class="headerlink" title="概述"></a>概述</h2><p>利用篡改smallbins中free的块的bk来实现任意地址分配</p>
+<p>&lt;&#x3D;2.26可以使用</p>
+<p>2.27加入tcache，需要手动填满</p>
+<h2 id="原理-3"><a href="#原理-3" class="headerlink" title="原理"></a>原理</h2><p>smallbins中</p>
+<ul>
+<li>原理bins的堆块是更前面的堆块，所以fd指向远离bins的</li>
+<li>靠近bins的堆块是更后面的堆块，所以bk指向靠近bins的</li>
+</ul>
+<p>smallbins的分配中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><code class="hljs c"> <span class="hljs-keyword">if</span> (in_smallbin_range (nb))<span class="hljs-comment">//检查是否属于smallbin范围内</span><br>   &#123;<br>     idx = smallbin_index (nb);<span class="hljs-comment">//计算smallbin索引</span><br>     bin = bin_at (av, idx);<span class="hljs-comment">//获取smallbin指针</span><br><br>     <span class="hljs-keyword">if</span> ((victim = last (bin)) != bin)<span class="hljs-comment">//尝试从smallbin中分配内存</span><br>       &#123;<br>         <span class="hljs-keyword">if</span> (victim == <span class="hljs-number">0</span>) <span class="hljs-comment">/* initialization check（初始化检查） */</span><br>           malloc_consolidate (av);<span class="hljs-comment">//如果分配区还没初始化就初始化，这是初始化函数</span><br>         <span class="hljs-keyword">else</span><br>           &#123;<br>             bck = victim-&gt;bk;<br><span class="hljs-keyword">if</span> (__glibc_unlikely (bck-&gt;fd != victim))<span class="hljs-comment">//检查双向链表完整性</span><br>               &#123;<br>                 errstr = <span class="hljs-string">&quot;malloc(): smallbin double linked list corrupted&quot;</span>;<br>                 <span class="hljs-keyword">goto</span> errout;<br>               &#125;<br>             set_inuse_bit_at_offset (victim, nb);<span class="hljs-comment">//标记内存块已使用和设置内存块大小</span><br>              <span class="hljs-comment">//接下来两行是更新双向链表指针</span><br>             bin-&gt;bk = bck;<br>             bck-&gt;fd = bin;<br><br>             <span class="hljs-keyword">if</span> (av != &amp;main_arena)<span class="hljs-comment">//如果不属于主分配区，则进入if，标记为非主分配区</span><br>               victim-&gt;size |= NON_MAIN_ARENA;<br>             check_malloced_chunk (av, victim, nb);<span class="hljs-comment">//检查内存块</span><br>             <span class="hljs-type">void</span> *p = chunk2mem (victim);<span class="hljs-comment">//转换</span><br>             alloc_perturb (p, bytes);<br>             <span class="hljs-keyword">return</span> p;<br>           &#125;<br>       &#125;<br>   &#125;<br></code></pre></td></tr></table></figure>
+
+<p>主要利用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c">             bck = victim-&gt;bk;<br><span class="hljs-keyword">if</span> (__glibc_unlikely (bck-&gt;fd != victim))<span class="hljs-comment">//检查双向链表完整性</span><br>               &#123;<br>                 errstr = <span class="hljs-string">&quot;malloc(): smallbin double linked list corrupted&quot;</span>;<br>                 <span class="hljs-keyword">goto</span> errout;<br>               &#125;<br>             set_inuse_bit_at_offset (victim, nb);<span class="hljs-comment">//标记内存块已使用和设置内存块大小</span><br>              <span class="hljs-comment">//接下来两行是更新双向链表指针</span><br>             bin-&gt;bk = bck;<br>             bck-&gt;fd = bin;<br></code></pre></td></tr></table></figure>
+
+<p>要可以修改smallbin中chunk的bk和fake_chunk的fd</p>
+<p>过程</p>
+<ul>
+<li>修改smallbins中的chunk的bk为&amp;fake_chunk</li>
+<li>修改fake_chunk的fd为smallbins中的chunk地址来通过检查</li>
+<li>还需要另一个fake_chunk来使第二次分配时通过检查<ul>
+<li>需要伪造fake_chunk-&gt;bk&#x3D;&amp;fake_chunk2</li>
+<li>需要fake_chunk2-&gt;fd&#x3D;&amp;fake_chunk</li>
+</ul>
+</li>
+<li>分配两次得到fake_chunk</li>
+</ul>
 
                 
               </div>
