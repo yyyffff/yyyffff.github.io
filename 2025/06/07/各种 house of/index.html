@@ -27,7 +27,7 @@
 <meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-07-10T04:54:28.752Z">
+<meta property="article:modified_time" content="2025-07-11T05:33:25.111Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.2k 字
+          1.4k 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          11 分钟
+          12 分钟
         
       </span>
     
@@ -370,17 +370,44 @@
 <p>主要利用</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c">             bck = victim-&gt;bk;<br><span class="hljs-keyword">if</span> (__glibc_unlikely (bck-&gt;fd != victim))<span class="hljs-comment">//检查双向链表完整性</span><br>               &#123;<br>                 errstr = <span class="hljs-string">&quot;malloc(): smallbin double linked list corrupted&quot;</span>;<br>                 <span class="hljs-keyword">goto</span> errout;<br>               &#125;<br>             set_inuse_bit_at_offset (victim, nb);<span class="hljs-comment">//标记内存块已使用和设置内存块大小</span><br>              <span class="hljs-comment">//接下来两行是更新双向链表指针</span><br>             bin-&gt;bk = bck;<br>             bck-&gt;fd = bin;<br></code></pre></td></tr></table></figure>
 
-<p>要可以修改smallbin中chunk的bk和fake_chunk的fd</p>
+<p>要可以修改 smallbin 中 chunk 的 bk 和 fake_chunk 的fd</p>
 <p>过程</p>
 <ul>
-<li>修改smallbins中的chunk的bk为&amp;fake_chunk</li>
-<li>修改fake_chunk的fd为smallbins中的chunk地址来通过检查</li>
-<li>还需要另一个fake_chunk来使第二次分配时通过检查<ul>
-<li>需要伪造fake_chunk-&gt;bk&#x3D;&amp;fake_chunk2</li>
-<li>需要fake_chunk2-&gt;fd&#x3D;&amp;fake_chunk</li>
+<li>修改 smallbins 中的 chunk 的 bk为 &amp;fake_chunk</li>
+<li>修改f ake_chunk 的fd为 smallbins 中的 chunk 地址来通过检查</li>
+<li>还需要另一个 fake_chunk 来使第二次分配时通过检查<ul>
+<li>需要伪造 fake_chunk-&gt;bk&#x3D;&amp;fake_chunk2</li>
+<li>需要 fake_chunk2-&gt;fd&#x3D;&amp;fake_chunk</li>
 </ul>
 </li>
-<li>分配两次得到fake_chunk</li>
+<li>分配两次得到 fake_chunk</li>
+</ul>
+<h1 id="House-of-Rabbit"><a href="#House-of-Rabbit" class="headerlink" title="House of Rabbit"></a>House of Rabbit</h1><h2 id="概述-4"><a href="#概述-4" class="headerlink" title="概述"></a>概述</h2><p>利用 fastbin 和 malloc_consolidate 机制实现任意地址分配或读写</p>
+<h2 id="原理-4"><a href="#原理-4" class="headerlink" title="原理"></a>原理</h2><p>利用 malloc_consolidate 的时候对 fastbin 中的堆块的 size 没有检查从而可以伪造一个 fake_chunk</p>
+<ul>
+<li><p>可以修改 fastbin 的 fd 或 size</p>
+</li>
+<li><p>可以触发  malloc consolidate</p>
+</li>
+</ul>
+<p>利用过程</p>
+<ul>
+<li>修改size<ul>
+<li>分配两个 chunk，fastbin 范围内，再来一个隔开 top chunk</li>
+<li>free 前两个 chunk</li>
+<li>修改第一个 chunksize 为 0xa1</li>
+<li>接着 malloc(0x1000) 触发 malloc_consolidate </li>
+<li>然后这两个快就被分别放到了对应的 smallbin 中</li>
+</ul>
+</li>
+<li>修改 fd<ul>
+<li>分配1个 chunk ，fastbin范围内，再来一个隔开top</li>
+<li>free 掉第一个</li>
+<li>修改第一个 fd 为 fake_chunk</li>
+<li>接着 malloc(0x1000) 触发 malloc_consolidate </li>
+<li>然后这个fake_chunk就合法了，可以对其进行其他操作</li>
+</ul>
+</li>
 </ul>
 
                 
