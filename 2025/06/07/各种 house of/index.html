@@ -27,7 +27,7 @@
 <meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-07-11T05:33:25.111Z">
+<meta property="article:modified_time" content="2025-07-15T07:46:19.720Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.4k 字
+          1.5k 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          12 分钟
+          13 分钟
         
       </span>
     
@@ -409,6 +409,18 @@
 </ul>
 </li>
 </ul>
+<h1 id="House-of-Roman"><a href="#House-of-Roman" class="headerlink" title="House of Roman"></a>House of Roman</h1><h2 id="概述-5"><a href="#概述-5" class="headerlink" title="概述"></a>概述</h2><p>利用fastbins attack和unsortedbin attack来 绕过PIE</p>
+<p>要有溢出写和UAF类似的漏洞</p>
+<p>2.23-2.29</p>
+<h2 id="原理-5"><a href="#原理-5" class="headerlink" title="原理"></a>原理</h2><ol>
+<li>分配四个chunk(A,B,C,D)，chunkB大小为0x70</li>
+<li>free(B)，B进入fastbin[0x70]</li>
+<li>利用A来将B-&gt;size修改为unsortedbin范围内</li>
+<li>再次释放B，B进入unsortedbin，此时fd，bk都是main_arena+88，修改fd为_malloc_hook-0x23</li>
+<li>利用A再次修改B的size，使其符合fastbin[0x70]</li>
+<li>接着利用unsortedbin attack将_malloc_hook处写成main_arena+88</li>
+<li>然后利用部分写将该地址改成one_gadgets或system完成攻击</li>
+</ol>
 
                 
               </div>
