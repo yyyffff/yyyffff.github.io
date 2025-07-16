@@ -27,7 +27,7 @@
 <meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-07-15T07:46:19.720Z">
+<meta property="article:modified_time" content="2025-07-16T02:48:03.548Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -319,7 +319,7 @@
 </ul>
 </li>
 </ul>
-<h1 id="House-Of-Einherjar"><a href="#House-Of-Einherjar" class="headerlink" title="House Of Einherjar"></a>House Of Einherjar</h1><h2 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h2><p>利用堆块的向后合并机制强制使得malloc返回一个几乎任意地址的chunk</p>
+<h1 id="House-of-Einherjar"><a href="#House-of-Einherjar" class="headerlink" title="House of Einherjar"></a>House of Einherjar</h1><h2 id="概述-1"><a href="#概述-1" class="headerlink" title="概述"></a>概述</h2><p>利用堆块的向后合并机制强制使得malloc返回一个几乎任意地址的chunk</p>
 <h2 id="原理-1"><a href="#原理-1" class="headerlink" title="原理"></a>原理</h2><p>向后合并</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* consolidate backward */</span><br>    <span class="hljs-keyword">if</span> (!prev_inuse(p)) <br>    &#123;<br>      prevsize = p-&gt;prev_size;<br>      size += prevsize;<br>      p = chunk_at_offset(p, -((<span class="hljs-type">long</span>) prevsize));<br>      unlink(av, p, bck, fwd);<br>    &#125;<br></code></pre></td></tr></table></figure>
 
@@ -343,7 +343,7 @@
 <li>最后unlink将其放入了unsortedbin后需要将fd，bk改写为main_arena+88</li>
 </ul>
 <p>最后malloc就得到目标地址的堆块了</p>
-<h1 id="House-Of-Force"><a href="#House-Of-Force" class="headerlink" title="House Of Force"></a>House Of Force</h1><h2 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h2><p>利用篡改top chunk的size，来实现任意地址分配</p>
+<h1 id="House-of-Force"><a href="#House-of-Force" class="headerlink" title="House of Force"></a>House of Force</h1><h2 id="概述-2"><a href="#概述-2" class="headerlink" title="概述"></a>概述</h2><p>利用篡改top chunk的size，来实现任意地址分配</p>
 <p>2.23-2.27</p>
 <h2 id="原理-2"><a href="#原理-2" class="headerlink" title="原理"></a>原理</h2><p>top chunk的分割机制（2.23）</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs c">victim = av-&gt;top;<span class="hljs-comment">//获取top chunk</span><br>size = chunksize (victim);<span class="hljs-comment">//获取top的大小</span><br><br><span class="hljs-keyword">if</span> ((<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (size) &gt;= (<span class="hljs-type">unsigned</span> <span class="hljs-type">long</span>) (nb + MINSIZE))<span class="hljs-comment">//top chunk足够大</span><br>  &#123;<br>    remainder_size = size - nb;<span class="hljs-comment">//计算剩余</span><br>    remainder = chunk_at_offset (victim, nb);<span class="hljs-comment">//计算分割后指针</span><br>    av-&gt;top = remainder;<br>    set_head (victim, nb | PREV_INUSE |<br>              (av != &amp;main_arena ? NON_MAIN_ARENA : <span class="hljs-number">0</span>));<br>    set_head (remainder, remainder_size | PREV_INUSE);<span class="hljs-comment">//设置剩余部分头部信息</span><br><br>    check_malloced_chunk (av, victim, nb);<br>    <span class="hljs-type">void</span> *p = chunk2mem (victim);<br>    alloc_perturb (p, bytes);<br>    <span class="hljs-keyword">return</span> p;<span class="hljs-comment">//返回分配的内存地址</span><br>  &#125;<br></code></pre></td></tr></table></figure>
