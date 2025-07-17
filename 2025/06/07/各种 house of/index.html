@@ -27,7 +27,7 @@
 <meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-07-16T02:48:03.548Z">
+<meta property="article:modified_time" content="2025-07-16T02:49:36.228Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -421,7 +421,7 @@
 <li>接着利用unsortedbin attack将_malloc_hook处写成main_arena+88</li>
 <li>然后利用部分写将该地址改成one_gadgets或system完成攻击</li>
 </ol>
-
+<h1 id="House-of-Pig"><a href="#House-of-Pig" class="headerlink" title="House of Pig"></a>House of Pig</h1><h2 id="概述-6"><a href="#概述-6" class="headerlink" title="概述"></a>概述</h2>
                 
               </div>
             
