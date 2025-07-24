@@ -27,7 +27,7 @@
 <meta property="og:description" content="House of Orange概述对top chunk进行利用，在没有free存在的情况下创造free到unsortedbin中的空闲块，从而得到unsortedbin地址，在进行后续操作即可获得main_arena地址等 原理当当前堆的top chunk尺寸不足以满足申请的分配大小的时候，原来的top chunk会被释放并且放入unsortedbin中，接着再映射或者扩展一个新top chunk">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-06-07T08:27:19.000Z">
-<meta property="article:modified_time" content="2025-07-16T02:49:36.228Z">
+<meta property="article:modified_time" content="2025-07-21T08:29:23.828Z">
 <meta property="article:author" content="yyf">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -335,7 +335,7 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> (__builtin_expect (chunksize(P) != prev_size (next_chunk(P)), <span class="hljs-number">0</span>))      \<br>  malloc_printerr (check_action, <span class="hljs-string">&quot;corrupted size vs. prev_size&quot;</span>, P, AV);<br>  .....<br>      <span class="hljs-keyword">if</span> (__builtin_expect (FD-&gt;bk != P || BK-&gt;fd != P, <span class="hljs-number">0</span>))		      \<br>  malloc_printerr (check_action, <span class="hljs-string">&quot;corrupted double-linked list&quot;</span>, P, AV); <br></code></pre></td></tr></table></figure>
 
 <ul>
-<li>A块下一个块的prev_size字段要&#x3D;A块大小，就是A+chunksize(A)&#x3D;chunksize(A)</li>
+<li>A块下一个块的prev_size字段要&#x3D;A块大小，就是 &amp;(A+chunksize(A))&#x3D;chunksize(A)</li>
 <li>A块的fd，bk都指向A块的地址</li>
 </ul>
 <p>2.23只有第二个检查</p>
