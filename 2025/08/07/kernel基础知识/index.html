@@ -19,17 +19,23 @@
   <meta name="author" content="yyf">
   <meta name="keywords" content="">
   
-    <meta name="description" content="yyyffff的个人博客">
+    <meta name="description" content="Operating System Kernel 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等  其本质与用户进程无异，都是在物理内存中的代码+数据 不同在于当 cpu 执行内核代码是运行在最高权限，可以完全访问硬件，而执行用户的代码一般在低权限 hierarchical pro">
 <meta property="og:type" content="article">
 <meta property="og:title" content="kernel基础知识">
 <meta property="og:url" content="http://yyyffff.github.io/2025/08/07/kernel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html">
 <meta property="og:site_name" content="yyyffff">
-<meta property="og:description" content="yyyffff的个人博客">
+<meta property="og:description" content="Operating System Kernel 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等  其本质与用户进程无异，都是在物理内存中的代码+数据 不同在于当 cpu 执行内核代码是运行在最高权限，可以完全访问硬件，而执行用户的代码一般在低权限 hierarchical pro">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754637988167.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754639038432.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754668056185.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754668075998.png">
 <meta property="article:published_time" content="2025-08-07T15:23:11.000Z">
-<meta property="article:modified_time" content="2025-08-07T15:23:11.056Z">
+<meta property="article:modified_time" content="2025-08-08T15:48:17.768Z">
 <meta property="article:author" content="yyf">
+<meta property="article:tag" content="kernel">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754637988167.png">
   
   
   
@@ -235,7 +241,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 字
+          668 字
         
       </span>
     
@@ -246,7 +252,7 @@
         
         
         
-          1 分钟
+          6 分钟
         
       </span>
     
@@ -297,7 +303,50 @@
             
               <div class="markdown-body">
                 
-                
+                <h1 id="Operating-System-Kernel"><a href="#Operating-System-Kernel" class="headerlink" title="Operating System Kernel"></a>Operating System Kernel</h1><p> 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754637988167.png" srcset="/img/loading.gif" lazyload></p>
+<p>其本质与用户进程无异，都是在物理内存中的代码+数据</p>
+<p>不同在于当 cpu 执行内核代码是运行在<strong>最高权限</strong>，可以完全访问硬件，而执行用户的代码一般在低权限</p>
+<h1 id="hierarchical-protection-domains"><a href="#hierarchical-protection-domains" class="headerlink" title="hierarchical protection domains"></a>hierarchical protection domains</h1><p> <strong>分级保护域</strong>（hierarchical protection domains），一种将计算机不同资源划分为不同权限的模型，在一些硬件或者微代码级别上提供不同特权态模式的 cpu 架构上，保护环通常是硬件强制的</p>
+<p>从最高到最低为 Ring0-Ring3</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754639038432.png" srcset="/img/loading.gif" lazyload></p>
+<p>现代操作系统用通常只会使用过 Ring0 和 Ring3，对应内核和用户进程</p>
+<ul>
+<li>用户态：CPU 运行在 Ring3 + 用户进程运行环境上下文</li>
+<li>内核态：CPU 运行在 Ring0 + 内核代码运行环境上下文</li>
+</ul>
+<h1 id="状态切换"><a href="#状态切换" class="headerlink" title="状态切换"></a>状态切换</h1><ul>
+<li>中断与异常（interrupt &amp; exception）：CPU 收到中断&#x2F;异常时，切换到 Ring0 ，并根据中断描述符表索引对应代码并执行</li>
+<li>特权级相关指令：CPU 运行到这些指令时状态发生改变<ul>
+<li>iret （0-&gt;3）</li>
+<li>stsenter （3-&gt;0）</li>
+</ul>
+</li>
+</ul>
+<h2 id="用户态-内核态（系统调用）"><a href="#用户态-内核态（系统调用）" class="headerlink" title="用户态-&gt;内核态（系统调用）"></a>用户态-&gt;内核态（系统调用）</h2><p>发生系统调用、产生异常、外设产生中断等事件时，会进入内核态并用对应的处理程序进行处理</p>
+<p>进入内核态后</p>
+<ul>
+<li>通过 swapgs 切换 GS 段寄存器吗，将其与一个特定位置的值交换，为了保存段寄存器和切换到内核执行的 GS 寄存器</li>
+<li>将当前栈顶记录在 CPU 独占变量区域里，将里面记录的内核栈顶赋给 RSP&#x2F;ESP</li>
+<li>push 保存各项寄存器的值</li>
+<li>通过汇编指令判断是否为 x32_abi（使用 64 位寄存器和调用约定，但将指针限制为 32 位以节省内存）</li>
+<li>通过系统调用好，跳到全局变量 sys_call_table 相应位置执行系统调用</li>
+</ul>
+<h2 id="内核态-用户态"><a href="#内核态-用户态" class="headerlink" title="内核态-&gt;用户态"></a>内核态-&gt;用户态</h2><ul>
+<li>通过 swspgs 恢复 GS 寄存器值</li>
+<li>通过 ssyretq 或 iretq 恢复到用户空间继续执行，使用 iretq 还需要给出用户空间的一些信息（CS，esp&#x2F;rsp 等）</li>
+</ul>
+<h1 id="虚拟内存空间"><a href="#虚拟内存空间" class="headerlink" title="虚拟内存空间"></a>虚拟内存空间</h1><p>计算机虚拟内存地址空间一般被分为两块</p>
+<ul>
+<li>供用户使用的用户空间（use space）</li>
+<li>供内核使用的内核空间（kernel space）</li>
+</ul>
+<p>对于 linux 来说，较高虚拟地址被分配给内核，而低虚拟地址给了用户进程</p>
+<p>32 位虚拟内存空间布局：</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754668056185.png" srcset="/img/loading.gif" lazyload></p>
+<p>64</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/1754668075998.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="进程权限管理"><a href="#进程权限管理" class="headerlink" title="进程权限管理"></a>进程权限管理</h1>
                 
               </div>
             
@@ -305,6 +354,13 @@
             <div>
               <div class="post-metas my-3">
   
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/kernel/" class="print-no-link">#kernel</a>
+      
+    </div>
   
 </div>
 
