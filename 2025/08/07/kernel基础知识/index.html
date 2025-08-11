@@ -21,28 +21,28 @@
   
     <meta name="description" content="Operating System Kernel 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等  其本质与用户进程无异，都是在物理内存中的代码+数据 不同在于当 cpu 执行内核代码是运行在最高权限，可以完全访问硬件，而执行用户的代码一般在低权限 hierarchical pro">
 <meta property="og:type" content="article">
-<meta property="og:title" content="kernel基础知识">
-<meta property="og:url" content="http://yyyffff.github.io/2025/08/07/kernel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:title" content="kernel基础知识及环境搭建">
+<meta property="og:url" content="http://yyyffff.github.io/2025/08/07/kernel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/index.html">
 <meta property="og:site_name" content="yyyffff">
 <meta property="og:description" content="Operating System Kernel 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等  其本质与用户进程无异，都是在物理内存中的代码+数据 不同在于当 cpu 执行内核代码是运行在最高权限，可以完全访问硬件，而执行用户的代码一般在低权限 hierarchical pro">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754637988167.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754639038432.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668056185.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668075998.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754729545783.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754814044256.png">
-<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754818591228.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754637988167.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754639038432.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754668056185.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754668075998.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754729545783.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754814044256.png">
+<meta property="og:image" content="http://yyyffff.github.io/1754818591228.png">
 <meta property="article:published_time" content="2025-08-07T15:23:11.000Z">
-<meta property="article:modified_time" content="2025-08-11T16:02:09.315Z">
+<meta property="article:modified_time" content="2025-08-11T16:14:55.179Z">
 <meta property="article:author" content="yyf">
 <meta property="article:tag" content="kernel">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754637988167.png">
+<meta name="twitter:image" content="http://yyyffff.github.io/1754637988167.png">
   
   
   
-  <title>kernel基础知识 - yyyffff</title>
+  <title>kernel基础知识及环境搭建 - yyyffff</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -221,7 +221,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="kernel基础知识"></span>
+            <span id="subtitle" data-typed-text="kernel基础知识及环境搭建"></span>
           
         </div>
 
@@ -301,18 +301,18 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">kernel基础知识</h1>
+            <h1 id="seo-header">kernel基础知识及环境搭建</h1>
             
             
               <div class="markdown-body">
                 
                 <h1 id="Operating-System-Kernel"><a href="#Operating-System-Kernel" class="headerlink" title="Operating System Kernel"></a>Operating System Kernel</h1><p> 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754637988167.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/1754637988167.png" srcset="/img/loading.gif" lazyload></p>
 <p>其本质与用户进程无异，都是在物理内存中的代码+数据</p>
 <p>不同在于当 cpu 执行内核代码是运行在<strong>最高权限</strong>，可以完全访问硬件，而执行用户的代码一般在低权限</p>
 <h1 id="hierarchical-protection-domains"><a href="#hierarchical-protection-domains" class="headerlink" title="hierarchical protection domains"></a>hierarchical protection domains</h1><p> <strong>分级保护域</strong>（hierarchical protection domains），一种将计算机不同资源划分为不同权限的模型，在一些硬件或者微代码级别上提供不同特权态模式的 cpu 架构上，保护环通常是硬件强制的</p>
 <p>从最高到最低为 Ring0-Ring3</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754639038432.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/1754639038432.png" srcset="/img/loading.gif" lazyload></p>
 <p>现代操作系统用通常只会使用过 Ring0 和 Ring3，对应内核和用户进程</p>
 <ul>
 <li>用户态：CPU 运行在 Ring3 + 用户进程运行环境上下文</li>
@@ -346,12 +346,12 @@
 </ul>
 <p>对于 linux 来说，较高虚拟地址被分配给内核，而低虚拟地址给了用户进程</p>
 <p>32 位虚拟内存空间布局：</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668056185.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/1754668056185.png" srcset="/img/loading.gif" lazyload></p>
 <p>64</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668075998.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/1754668075998.png" srcset="/img/loading.gif" lazyload></p>
 <h1 id="进程权限管理"><a href="#进程权限管理" class="headerlink" title="进程权限管理"></a>进程权限管理</h1><p>内核调度一切系统资源并为用户应用提供运行环境，相应，应用权限也是由内核进行管理的2</p>
 <h2 id="进程描述符（process-descriptor）"><a href="#进程描述符（process-descriptor）" class="headerlink" title="进程描述符（process descriptor）"></a>进程描述符（process descriptor）</h2><p>内核用结构体 task_struct 表示一个进程，该结构体在内核源码 include&#x2F;linux&#x2F;sched.h</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754729545783.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/1754729545783.png" srcset="/img/loading.gif" lazyload></p>
 <h2 id="进程权限凭证（credential）"><a href="#进程权限凭证（credential）" class="headerlink" title="进程权限凭证（credential）"></a>进程权限凭证（credential）</h2><p>task_struct 中有如下代码</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Process credentials: */</span><br><br><span class="hljs-comment">/* Tracer&#x27;s credentials at attach: */</span><br><span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> __<span class="hljs-title">rcu</span>        *<span class="hljs-title">ptracer_cred</span>;</span><br><br><span class="hljs-comment">/* Objective and real subjective task credentials (COW): */</span><br><span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> __<span class="hljs-title">rcu</span>        *<span class="hljs-title">real_cred</span>;</span><br><br><span class="hljs-comment">/* Effective (overridable) subjective task credentials (COW): */</span><br><span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> __<span class="hljs-title">rcu</span>        *<span class="hljs-title">cred</span>;</span><br></code></pre></td></tr></table></figure>
 
@@ -455,7 +455,7 @@
 </ul>
 <h3 id="KETI"><a href="#KETI" class="headerlink" title="KETI"></a>KETI</h3><p>内核页表隔离 （Kernel page-table isolation） ，内核空间和用户空间分别只用两组不同的页表，这对于内核的内存管理产生了根本性变化</p>
 <p>两张表都有对用户内存空间的完整映射，但在用户页只影射了少量内核代码（如系统调用入口点，中断处理等），只有在内核页表中才有对内核内存空间的完整映射</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754814044256.png" srcset="/img/loading.gif" lazyload alt="开启保护前/后的变化"></p>
+<p><img src="/1754814044256.png" srcset="/img/loading.gif" lazyload alt="开启保护前/后的变化"></p>
 <p>主要用来缓解 Meltdown 漏洞</p>
 <p>KPTI 同时令内核页表中属于用户地址空间的部分不再拥有执行权限，是 ret2usr 不再可用</p>
 <h2 id="内核“堆“上保护机制"><a href="#内核“堆“上保护机制" class="headerlink" title="内核“堆“上保护机制"></a>内核“堆“上保护机制</h2><h3 id="Hardened-Usercopy"><a href="#Hardened-Usercopy" class="headerlink" title="Hardened Usercopy"></a>Hardened Usercopy</h3><p>一种用以在用户空间和内核空间之间拷贝数据时进行越界检查的机制，主要检查拷贝过程是否会对内核空间的数据进行越界读写   ：</p>
@@ -473,7 +473,7 @@
 <p>所以攻击者至少获取到第一或第三个值才可以篡改 freelist</p>
 <h3 id="Random-freelist"><a href="#Random-freelist" class="headerlink" title="Random freelist"></a>Random freelist</h3><p>发生在 slub allocator（管理小内存的分配和释放）向 buddy system（管理内存页的分配和释放）申请到页框之后的处理过程中，对于未开启的，其上的 object 连接顺序是线性的，但开启后会变成随机的，使攻击者无法预测下一个分配的 objext 地址</p>
 <p>运行时 freelist 的构成仍然遵循 LIFO</p>
-<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754818591228.png" srcset="/img/loading.gif" lazyload></p>
+<p><img src="/1754818591228.png" srcset="/img/loading.gif" lazyload></p>
 <h3 id="CONFIG-INIT-ON-ALLOC-DEFAULT-ON"><a href="#CONFIG-INIT-ON-ALLOC-DEFAULT-ON" class="headerlink" title="CONFIG_INIT_ON_ALLOC_DEFAULT_ON"></a>CONFIG_INIT_ON_ALLOC_DEFAULT_ON</h3><p>内核进行堆内存分配时，会对分配的内存上的内容进行清零</p>
 <h1 id="CTF-kernel-pwn-相关"><a href="#CTF-kernel-pwn-相关" class="headerlink" title="CTF kernel pwn 相关"></a>CTF kernel pwn 相关</h1><p>传统 kernel pwn 题目会给以下三个文件</p>
 <ul>
@@ -505,8 +505,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>kernel基础知识</div>
-      <div>http://yyyffff.github.io/2025/08/07/kernel基础知识及环境搭建/</div>
+      <div>kernel基础知识及环境搭建</div>
+      <div>http://yyyffff.github.io/2025/08/07/kernel基础知识/</div>
     </div>
     <div class="license-meta">
       
@@ -550,12 +550,18 @@
                   <article class="post-prev col-6">
                     
                     
+                      <a href="/2025/08/07/kernel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" title="kernel基础知识">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">kernel基础知识</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2025/08/07/kernel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" title="kernel基础知识及环境搭建">
-                        <span class="hidden-mobile">kernel基础知识及环境搭建</span>
+                      <a href="/2025/08/07/%E8%8A%B1%E5%BC%8F%E6%A0%88%E6%BA%A2%E5%87%BA%E6%8A%80%E5%B7%A7/" title="花式栈溢出技巧">
+                        <span class="hidden-mobile">花式栈溢出技巧</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
