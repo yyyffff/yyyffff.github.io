@@ -1,0 +1,884 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/128.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yyf">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Operating System Kernel 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等  其本质与用户进程无异，都是在物理内存中的代码+数据 不同在于当 cpu 执行内核代码是运行在最高权限，可以完全访问硬件，而执行用户的代码一般在低权限 hierarchical pro">
+<meta property="og:type" content="article">
+<meta property="og:title" content="kernel基础知识">
+<meta property="og:url" content="http://yyyffff.github.io/2025/08/07/kernel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/index.html">
+<meta property="og:site_name" content="yyyffff">
+<meta property="og:description" content="Operating System Kernel 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等  其本质与用户进程无异，都是在物理内存中的代码+数据 不同在于当 cpu 执行内核代码是运行在最高权限，可以完全访问硬件，而执行用户的代码一般在低权限 hierarchical pro">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754637988167.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754639038432.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668056185.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668075998.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754729545783.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754814044256.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754818591228.png">
+<meta property="article:published_time" content="2025-08-07T15:23:11.000Z">
+<meta property="article:modified_time" content="2025-08-11T16:02:09.315Z">
+<meta property="article:author" content="yyf">
+<meta property="article:tag" content="kernel">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754637988167.png">
+  
+  
+  
+  <title>kernel基础知识 - yyyffff</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yyyffff.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":"2bkS2AvQTqNk4TIsyxh4ew9q-gzGzoHsz","app_key":"GfRH0zMaM1USTNT6w25DTqu8","server_url":"https://2bks2avq.lc-cn-n1-shared.com","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>yyyffff</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="kernel基础知识"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-08-07 23:23" pubdate>
+          2025年8月7日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          25 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">kernel基础知识</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="Operating-System-Kernel"><a href="#Operating-System-Kernel" class="headerlink" title="Operating System Kernel"></a>Operating System Kernel</h1><p> 操作系统内核（Operation System Kernel） 本质上是一种软件，是应用与硬件的中间层，主要作用是调用系统资源、控制 IO 设备及操作网络与文件系统等</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754637988167.png" srcset="/img/loading.gif" lazyload></p>
+<p>其本质与用户进程无异，都是在物理内存中的代码+数据</p>
+<p>不同在于当 cpu 执行内核代码是运行在<strong>最高权限</strong>，可以完全访问硬件，而执行用户的代码一般在低权限</p>
+<h1 id="hierarchical-protection-domains"><a href="#hierarchical-protection-domains" class="headerlink" title="hierarchical protection domains"></a>hierarchical protection domains</h1><p> <strong>分级保护域</strong>（hierarchical protection domains），一种将计算机不同资源划分为不同权限的模型，在一些硬件或者微代码级别上提供不同特权态模式的 cpu 架构上，保护环通常是硬件强制的</p>
+<p>从最高到最低为 Ring0-Ring3</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754639038432.png" srcset="/img/loading.gif" lazyload></p>
+<p>现代操作系统用通常只会使用过 Ring0 和 Ring3，对应内核和用户进程</p>
+<ul>
+<li>用户态：CPU 运行在 Ring3 + 用户进程运行环境上下文</li>
+<li>内核态：CPU 运行在 Ring0 + 内核代码运行环境上下文</li>
+</ul>
+<h1 id="状态切换"><a href="#状态切换" class="headerlink" title="状态切换"></a>状态切换</h1><ul>
+<li>中断与异常（interrupt &amp; exception）：CPU 收到中断&#x2F;异常时，切换到 Ring0 ，并根据中断描述符表索引对应代码并执行</li>
+<li>特权级相关指令：CPU 运行到这些指令时状态发生改变<ul>
+<li>iret （0-&gt;3）</li>
+<li>stsenter （3-&gt;0）</li>
+</ul>
+</li>
+</ul>
+<h2 id="用户态-内核态（系统调用）"><a href="#用户态-内核态（系统调用）" class="headerlink" title="用户态-&gt;内核态（系统调用）"></a>用户态-&gt;内核态（系统调用）</h2><p>发生系统调用、产生异常、外设产生中断等事件时，会进入内核态并用对应的处理程序进行处理</p>
+<p>进入内核态后</p>
+<ul>
+<li>通过 swapgs 切换 GS 段寄存器吗，将其与一个特定位置的值交换，为了保存段寄存器和切换到内核执行的 GS 寄存器</li>
+<li>将当前栈顶记录在 CPU 独占变量区域里，将里面记录的内核栈顶赋给 RSP&#x2F;ESP</li>
+<li>push 保存各项寄存器的值</li>
+<li>通过汇编指令判断是否为 x32_abi（使用 64 位寄存器和调用约定，但将指针限制为 32 位以节省内存）</li>
+<li>通过系统调用好，跳到全局变量 sys_call_table 相应位置执行系统调用</li>
+</ul>
+<h2 id="内核态-用户态"><a href="#内核态-用户态" class="headerlink" title="内核态-&gt;用户态"></a>内核态-&gt;用户态</h2><ul>
+<li>通过 swspgs 恢复 GS 寄存器值</li>
+<li>通过 ssyretq 或 iretq 恢复到用户空间继续执行，使用 iretq 还需要给出用户空间的一些信息（CS，esp&#x2F;rsp 等）</li>
+</ul>
+<h1 id="虚拟内存空间"><a href="#虚拟内存空间" class="headerlink" title="虚拟内存空间"></a>虚拟内存空间</h1><p>计算机虚拟内存地址空间一般被分为两块</p>
+<ul>
+<li>供用户使用的用户空间（use space）</li>
+<li>供内核使用的内核空间（kernel space）</li>
+</ul>
+<p>对于 linux 来说，较高虚拟地址被分配给内核，而低虚拟地址给了用户进程</p>
+<p>32 位虚拟内存空间布局：</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668056185.png" srcset="/img/loading.gif" lazyload></p>
+<p>64</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754668075998.png" srcset="/img/loading.gif" lazyload></p>
+<h1 id="进程权限管理"><a href="#进程权限管理" class="headerlink" title="进程权限管理"></a>进程权限管理</h1><p>内核调度一切系统资源并为用户应用提供运行环境，相应，应用权限也是由内核进行管理的2</p>
+<h2 id="进程描述符（process-descriptor）"><a href="#进程描述符（process-descriptor）" class="headerlink" title="进程描述符（process descriptor）"></a>进程描述符（process descriptor）</h2><p>内核用结构体 task_struct 表示一个进程，该结构体在内核源码 include&#x2F;linux&#x2F;sched.h</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754729545783.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="进程权限凭证（credential）"><a href="#进程权限凭证（credential）" class="headerlink" title="进程权限凭证（credential）"></a>进程权限凭证（credential）</h2><p>task_struct 中有如下代码</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Process credentials: */</span><br><br><span class="hljs-comment">/* Tracer&#x27;s credentials at attach: */</span><br><span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> __<span class="hljs-title">rcu</span>        *<span class="hljs-title">ptracer_cred</span>;</span><br><br><span class="hljs-comment">/* Objective and real subjective task credentials (COW): */</span><br><span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> __<span class="hljs-title">rcu</span>        *<span class="hljs-title">real_cred</span>;</span><br><br><span class="hljs-comment">/* Effective (overridable) subjective task credentials (COW): */</span><br><span class="hljs-type">const</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> __<span class="hljs-title">rcu</span>        *<span class="hljs-title">cred</span>;</span><br></code></pre></td></tr></table></figure>
+
+<p>cred 是一个结构体，用以管理一个进程的权限，定义在内核源码 include&#x2F;linux&#x2F;cred.h 中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * The security context of a task</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * The parts of the context break down into two categories:</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  (1) The objective context of a task.  These parts are used when some other</span><br><span class="hljs-comment"> *  task is attempting to affect this one.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> *  (2) The subjective context.  These details are used when the task is acting</span><br><span class="hljs-comment"> *  upon another object, be that a file, a task, a key or whatever.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * Note that some members of this structure belong to both categories - the</span><br><span class="hljs-comment"> * LSM security pointer for instance.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * A task has two security pointers.  task-&gt;real_cred points to the objective</span><br><span class="hljs-comment"> * context that defines that task&#x27;s actual details.  The objective part of this</span><br><span class="hljs-comment"> * context is used whenever that task is acted upon.</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * task-&gt;cred points to the subjective context that defines the details of how</span><br><span class="hljs-comment"> * that task is going to act upon another object.  This may be overridden</span><br><span class="hljs-comment"> * temporarily to point to another security context, but normally points to the</span><br><span class="hljs-comment"> * same context as task-&gt;real_cred.</span><br><span class="hljs-comment"> */</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cred</span> &#123;</span><br>    <span class="hljs-type">atomic_long_t</span>   usage;<br>    <span class="hljs-type">kuid_t</span>      uid;        <span class="hljs-comment">/* real UID of the task */</span><br>    <span class="hljs-type">kgid_t</span>      gid;        <span class="hljs-comment">/* real GID of the task */</span><br>    <span class="hljs-type">kuid_t</span>      suid;       <span class="hljs-comment">/* saved UID of the task */</span><br>    <span class="hljs-type">kgid_t</span>      sgid;       <span class="hljs-comment">/* saved GID of the task */</span><br>    <span class="hljs-type">kuid_t</span>      euid;       <span class="hljs-comment">/* effective UID of the task */</span><br>    <span class="hljs-type">kgid_t</span>      egid;       <span class="hljs-comment">/* effective GID of the task */</span><br>    <span class="hljs-type">kuid_t</span>      fsuid;      <span class="hljs-comment">/* UID for VFS ops */</span><br>    <span class="hljs-type">kgid_t</span>      fsgid;      <span class="hljs-comment">/* GID for VFS ops */</span><br>    <span class="hljs-type">unsigned</span>    securebits; <span class="hljs-comment">/* SUID-less security management */</span><br>    <span class="hljs-type">kernel_cap_t</span>    cap_inheritable; <span class="hljs-comment">/* caps our children can inherit */</span><br>    <span class="hljs-type">kernel_cap_t</span>    cap_permitted;  <span class="hljs-comment">/* caps we&#x27;re permitted */</span><br>    <span class="hljs-type">kernel_cap_t</span>    cap_effective;  <span class="hljs-comment">/* caps we can actually use */</span><br>    <span class="hljs-type">kernel_cap_t</span>    cap_bset;   <span class="hljs-comment">/* capability bounding set */</span><br>    <span class="hljs-type">kernel_cap_t</span>    cap_ambient;    <span class="hljs-comment">/* Ambient capability set */</span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_KEYS</span><br>    <span class="hljs-type">unsigned</span> <span class="hljs-type">char</span>   jit_keyring;    <span class="hljs-comment">/* default keyring to attach requested</span><br><span class="hljs-comment">                     * keys to */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">key</span>  *<span class="hljs-title">session_keyring</span>;</span> <span class="hljs-comment">/* keyring inherited over fork */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">key</span>  *<span class="hljs-title">process_keyring</span>;</span> <span class="hljs-comment">/* keyring private to this process */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">key</span>  *<span class="hljs-title">thread_keyring</span>;</span> <span class="hljs-comment">/* keyring private to this thread */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">key</span>  *<span class="hljs-title">request_key_auth</span>;</span> <span class="hljs-comment">/* assumed request_key authority */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">ifdef</span> CONFIG_SECURITY</span><br>    <span class="hljs-type">void</span>        *security;  <span class="hljs-comment">/* LSM security */</span><br><span class="hljs-meta">#<span class="hljs-keyword">endif</span></span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">user_struct</span> *<span class="hljs-title">user</span>;</span>   <span class="hljs-comment">/* real user ID subscription */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">user_namespace</span> *<span class="hljs-title">user_ns</span>;</span> <span class="hljs-comment">/* user_ns the caps and keyrings are relative to. */</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ucounts</span> *<span class="hljs-title">ucounts</span>;</span><br>    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">group_info</span> *<span class="hljs-title">group_info</span>;</span>  <span class="hljs-comment">/* supplementary groups for euid/fsgid */</span><br>    <span class="hljs-comment">/* RCU deletion */</span><br>    <span class="hljs-class"><span class="hljs-keyword">union</span> &#123;</span><br>        <span class="hljs-type">int</span> non_rcu;            <span class="hljs-comment">/* Can we skip RCU deletion? */</span><br>        <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">rcu_head</span> <span class="hljs-title">rcu</span>;</span>        <span class="hljs-comment">/* RCU deletion hook */</span><br>    &#125;;<br>&#125; __randomize_layout;<br></code></pre></td></tr></table></figure>
+
+<p>一个结构体中记载了一个进程四种不同的用户 ID ，通常情况下这几个 ID 应当都是相同的</p>
+<ul>
+<li><p>真实用户 ID （reak UID）：标识一个进程启动时的用户 ID</p>
+</li>
+<li><p>保存用户 ID（saved UID）：标识一个进程最初的有效用户 ID</p>
+</li>
+<li><p>有效用户 ID （effective UID）：标识一个进程正在运行时所属的用户 ID （运行时是可以该表所属用户的）因此权限机制也是利用该 ID 来认证的</p>
+<p>内核通过 euid 来进行特权判断，为了防止用户一直在高权限，当任务完成后，euid 会与 suid 交换，恢复进程有效权限</p>
+</li>
+<li><p>文件系统用户 ID（UID for VFS ops）：标识一个进程创建文件时进行标识的用户 ID</p>
+</li>
+</ul>
+<p>用户组 ID 同样分为 4 个，真实组 ID，保存组 ID，有效组 ID，文件系统组 ID，与用户 ID 类似</p>
+<h2 id="进程权限改变"><a href="#进程权限改变" class="headerlink" title="进程权限改变"></a>进程权限改变</h2><p>只要改变一个进程的 cred 结构体，就可以改变其权限</p>
+<p>内核空间由两个函数，都位于 kernel&#x2F;cred.c 中</p>
+<ul>
+<li><code>struct cred* prepare_kernel_cred(struct task_struct* daemon)</code> ：该函数用于拷贝一个进程的 cred 结构体，并返回一个新 cred 结构体。需要注意 daemon 参数应为有效的进程描述符地址</li>
+<li><code>int commit_creds(struct cred *new)</code>： 该函数用于将一个新 cred 结构体应用到进程之中</li>
+</ul>
+<h1 id="Loadable-Kernel-Modules-LKMs"><a href="#Loadable-Kernel-Modules-LKMs" class="headerlink" title="Loadable Kernel Modules(LKMs)"></a>Loadable Kernel Modules(LKMs)</h1><p>背景：linux 内核采用宏内核架构，一切系统服务都由内核提供，虽然效率高但是缺乏可扩展性和维护性，所以</p>
+<p>-&gt; <strong>可装载内核模块</strong>（Loadable Kernel Modules，简称 LKMs）出现了 ，位于内核空间的它可以提供新的系统调用或其他服务，同时其可以像积木一样可以装载进内核或从内核中卸载掉，大大提高了 kernel 的可拓展性和可维护性</p>
+<p>常见 LKMs：</p>
+<ul>
+<li>驱动设备<ul>
+<li>设备驱动</li>
+<li>文件系统驱动</li>
+<li>…</li>
+</ul>
+</li>
+<li>内核扩展模块</li>
+</ul>
+<p>LKMs 的文件格式和用户可执行程序相同</p>
+<ul>
+<li>linux：ELF</li>
+<li>windos ：exe&#x2F;dll</li>
+<li>mac：MACH-O</li>
+</ul>
+<p>可以用 IDA 等工具来分析内核模块</p>
+<p>模块可被单独编译，但不能单独运行。它在运行时被链接到内核上当作其一部分在内核空间运行，这与运行在用户进程的不同</p>
+<p>模块通常来实现一种文件系统、一个驱动程序或者其他内核上层的功能</p>
+<h2 id="相关指令"><a href="#相关指令" class="headerlink" title="相关指令"></a>相关指令</h2><ul>
+<li>insmod：将指定模块加载到内核</li>
+<li>rmmod：从内核卸载模块</li>
+<li>lsmod ：列出已加载的模块</li>
+<li>modprobe：添加或删除模块，modeprobe 在加载模块时会查找依赖关系</li>
+</ul>
+<p>大多数 CTF 中的 kernel vulnerability 也是出现在 LKMs 中</p>
+<h1 id="内核交互"><a href="#内核交互" class="headerlink" title="内核交互"></a>内核交互</h1><h2 id="系统调用"><a href="#系统调用" class="headerlink" title="系统调用"></a>系统调用</h2><p>系统调用只用户的程序向操作系统内核请求更高权限的服务，比如 IO 操作或进程间通信</p>
+<p>系统调用提供用户程序和操作系统间的接口，部分库函数如 scanf puts 等 IO 相关操作就是对 read write 系统调用的封装</p>
+<blockquote>
+<p> 在 &#x2F;usr&#x2F;include&#x2F;x86_64-linux-gnu&#x2F;asm&#x2F;unistd_64.h 和 &#x2F;usr&#x2F;include&#x2F;x86_64-linux-gnu&#x2F;asm&#x2F;unistd_32.h 分别可以查看 64 位和 32 位的系统调用号。 </p>
+</blockquote>
+<h2 id="系统调用：ioctl"><a href="#系统调用：ioctl" class="headerlink" title="系统调用：ioctl"></a>系统调用：ioctl</h2><p>在 linux 中，几乎所有设备都被视为文件，这使通过标准文件操作来访问设备更简单，但某些操作超出标准接口（比如 read&#x2F;write ）的能力，比如我要改变设备工作模式或查询设备状态等，这时候就需要 ioctl 了</p>
+<p>ioctl：一个专门用于设备输入输出操作的一个系统调用，其函数原型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> <span class="hljs-title function_">ioctl</span><span class="hljs-params">(<span class="hljs-type">int</span> fd, <span class="hljs-type">unsigned</span> <span class="hljs-type">long</span> request, ...)</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>fd：文件描述符</li>
+<li>request：对设备的指令</li>
+<li>再后边的参数就是一些与设备有关的补充参数</li>
+</ul>
+<h1 id="常见内核态函数"><a href="#常见内核态函数" class="headerlink" title="常见内核态函数"></a>常见内核态函数</h1><p>内核中不可使用 C 库函数，但是内核中有其对应的各种函数</p>
+<ul>
+<li>printf()-&gt;printk() 但是要注意其不一定把内容显示到终端上，但一定在内核缓冲区中，可用 dmesg 查看效果</li>
+<li>memcpy()-&gt;copt_from_user()&#x2F;copy_to_user()<ul>
+<li>第一个将用户空间数据传到内核空间</li>
+<li>第二个则相反</li>
+</ul>
+</li>
+<li>malloc()-&gt;kamlloc 内核的内存分配函数，和 malloc() 类似，但使用的使 slab&#x2F;slub 分配器</li>
+<li>free()-&gt;kfree()</li>
+</ul>
+<p>改变权限的函数</p>
+<ul>
+<li>int commit_creds(struct cred *new)</li>
+<li>struct cred* prepare_kernel_cred(struct task_struct* daemon)</li>
+</ul>
+<p> 执行 commit_creds(prepare_kernel_cred(&amp;init_task)) 即可获得 root 权限 ，也是最常用的提权手段，函数名及变量可在 &#x2F;proc&#x2F;kallsyms 中查看</p>
+<h1 id="保护机制"><a href="#保护机制" class="headerlink" title="保护机制"></a>保护机制</h1><h2 id="通用保护机制"><a href="#通用保护机制" class="headerlink" title="通用保护机制"></a>通用保护机制</h2><h3 id="KASLR"><a href="#KASLR" class="headerlink" title="KASLR"></a>KASLR</h3><p><strong>内核空间地址随机化</strong>，与用户程序的 ASLR 类似，在内核镜像映射到实际地址空间时加上一个偏移值（粒度 256MB），但是其内部相对偏移任然不变</p>
+<p>对于未开启 KASLR 时，内核代码段基址为   0xffffffff81000000 ，direct mapping area （直接映射区）的基址为 0xffff888000000000 </p>
+<h3 id="FGKASLR"><a href="#FGKASLR" class="headerlink" title="FGKASLR"></a>FGKASLR</h3><p><strong>函数粒度的内核地址空间随机化</strong>，是对 KASLR 保护的加强版</p>
+<p>KASLR 虽然能够一定程度上缓解攻击，但若攻击者获取到了内核中某个地址，仍然可以通过偏移从而得到整个内核地址空间布局</p>
+<p>该保护方式使内核在编译时把每个函数做成独立的代码块，启动时内核会随机排列这些函数的顺序再拼起来，这样</p>
+<ul>
+<li>函数之间偏移就是随机的了</li>
+<li>无法通过泄露一个函数的地址而知道整个内核的地址空间排布</li>
+</ul>
+<h3 id="STACK-PROTECTOR"><a href="#STACK-PROTECTOR" class="headerlink" title="STACK PROTECTOR"></a>STACK PROTECTOR</h3><p>类似 canary，通常又称 stakc cookie，检测是否发生栈溢出，若发生则产生 kernel panic</p>
+<p>内核中的 canary 值通常取子 GS 段寄存器某个固定偏移处的值</p>
+<h3 id="SMAP-SMEP"><a href="#SMAP-SMEP" class="headerlink" title="SMAP&#x2F;SMEP"></a>SMAP&#x2F;SMEP</h3><p> SMAP 即 <strong>管理模式访问保护</strong>（Supervisor Mode Access Prevention），SMEP 即<strong>管理模式执行保护</strong>（Supervisor Mode Execution Prevention） </p>
+<p>通常同时开启</p>
+<ul>
+<li>SMAP 阻止内核态访问用户态内存的数据（除非显示允许）</li>
+<li>SMEP 阻值内核态直接执行用户态内存中的代码</li>
+</ul>
+<h3 id="KETI"><a href="#KETI" class="headerlink" title="KETI"></a>KETI</h3><p>内核页表隔离 （Kernel page-table isolation） ，内核空间和用户空间分别只用两组不同的页表，这对于内核的内存管理产生了根本性变化</p>
+<p>两张表都有对用户内存空间的完整映射，但在用户页只影射了少量内核代码（如系统调用入口点，中断处理等），只有在内核页表中才有对内核内存空间的完整映射</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754814044256.png" srcset="/img/loading.gif" lazyload alt="开启保护前/后的变化"></p>
+<p>主要用来缓解 Meltdown 漏洞</p>
+<p>KPTI 同时令内核页表中属于用户地址空间的部分不再拥有执行权限，是 ret2usr 不再可用</p>
+<h2 id="内核“堆“上保护机制"><a href="#内核“堆“上保护机制" class="headerlink" title="内核“堆“上保护机制"></a>内核“堆“上保护机制</h2><h3 id="Hardened-Usercopy"><a href="#Hardened-Usercopy" class="headerlink" title="Hardened Usercopy"></a>Hardened Usercopy</h3><p>一种用以在用户空间和内核空间之间拷贝数据时进行越界检查的机制，主要检查拷贝过程是否会对内核空间的数据进行越界读写   ：</p>
+<ul>
+<li>读取数据长度是否超过 object 范围</li>
+<li>写入的数据长度是否超过 object 范围</li>
+</ul>
+<p>这种保护用户 copy_to_user() 与 copy_from_user() 等数据交换的 api 中，不过不适用于内核空间内的数据拷贝</p>
+<h3 id="Hardened-freelist"><a href="#Hardened-freelist" class="headerlink" title="Hardened freelist"></a>Hardened freelist</h3><p>类似于 glibc-2.32 加入的保护，开启保护后 free objext 的 next 指针存储的是以下三个值进行异或操作后的值</p>
+<ul>
+<li>当前 free object 地址</li>
+<li>下一个 free object 的地址</li>
+<li>有 kmem_cache 指定的一个 random 值</li>
+</ul>
+<p>所以攻击者至少获取到第一或第三个值才可以篡改 freelist</p>
+<h3 id="Random-freelist"><a href="#Random-freelist" class="headerlink" title="Random freelist"></a>Random freelist</h3><p>发生在 slub allocator（管理小内存的分配和释放）向 buddy system（管理内存页的分配和释放）申请到页框之后的处理过程中，对于未开启的，其上的 object 连接顺序是线性的，但开启后会变成随机的，使攻击者无法预测下一个分配的 objext 地址</p>
+<p>运行时 freelist 的构成仍然遵循 LIFO</p>
+<p><img src="/2025/01/18/%E5%A4%87%E6%B3%A8/nel%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86%E5%8F%8A%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/1754818591228.png" srcset="/img/loading.gif" lazyload></p>
+<h3 id="CONFIG-INIT-ON-ALLOC-DEFAULT-ON"><a href="#CONFIG-INIT-ON-ALLOC-DEFAULT-ON" class="headerlink" title="CONFIG_INIT_ON_ALLOC_DEFAULT_ON"></a>CONFIG_INIT_ON_ALLOC_DEFAULT_ON</h3><p>内核进行堆内存分配时，会对分配的内存上的内容进行清零</p>
+<h1 id="CTF-kernel-pwn-相关"><a href="#CTF-kernel-pwn-相关" class="headerlink" title="CTF kernel pwn 相关"></a>CTF kernel pwn 相关</h1><p>传统 kernel pwn 题目会给以下三个文件</p>
+<ul>
+<li>boot.sh 一个用于启动 kernel 的 shell 脚本，多用 qemu，保护措施与 qemu 不同的启动参数有关</li>
+<li>bzLmage：内核启动映像</li>
+<li>rootfs.cpio：文件系统映像</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/kernel/" class="print-no-link">#kernel</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>kernel基础知识</div>
+      <div>http://yyyffff.github.io/2025/08/07/kernel基础知识及环境搭建/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yyf</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2025年8月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/07/%E8%8A%B1%E5%BC%8F%E6%A0%88%E6%BA%A2%E5%87%BA%E6%8A%80%E5%B7%A7/" title="花式栈溢出技巧">
+                        <span class="hidden-mobile">花式栈溢出技巧</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"2bkS2AvQTqNk4TIsyxh4ew9q-gzGzoHsz","appKey":"GfRH0zMaM1USTNT6w25DTqu8","path":"window.location.pathname","placeholder":"说点什么","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
