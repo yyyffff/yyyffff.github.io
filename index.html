@@ -503,39 +503,6 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2025/07/09/VM%20pwn/" target="_self">
-          VM pwn
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2025/07/09/VM%20pwn/" target="_self">
-        <div>
-          概述VM pwn题目通常是模拟一套虚拟机，对用户输入的opcode进行解析，模拟程序的执行 一般会有如下操作  初始化模拟的寄存器空间(reg) 初始化模拟的栈空间(stack) 初始化模拟的data段(data) 初始化模拟的opcode存储空间(text)  当用户输入指令后，该程序会根据自己设计的逻辑进行执行，这些空间全都是自己分配的而不是系统给的 一般的漏洞都是越界读取导致的，导致地址泄露
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2025-07-09 11:37" pubdate>
-              2025-07-09
-            </time>
-          </div>
-        
-        
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
         <a href="/2025/06/11/pwnable.tw-bookwriter/" target="_self">
           pwnable.tw-bookwriter
         </a>
@@ -662,6 +629,39 @@
             <i class="iconfont icon-date"></i>
             <time datetime="2025-05-19 23:17" pubdate>
               2025-05-19
+            </time>
+          </div>
+        
+        
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/" target="_self">
+          一些小总结
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/" target="_self">
+        <div>
+          更换对应的libc和ld确定给的libc.so.6版本 1strings libc.so.6 | grep libc   在glibc-all-in-one中下载对应的版本 12cd ~cd glibc-all-in-one  列出版本列表 1cat list  下载 1./download 对应版本  patchelf到程序中 12patchelf --set-interpreter ~/gli
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2025-05-12 23:36" pubdate>
+              2025-05-12
             </time>
           </div>
         
