@@ -27,7 +27,7 @@
 <meta property="og:description" content="kernel rop前言内核 ROP 与普通的 ROP 无区别，只不过 system(&#x2F;bin&#x2F;sh) 变为了 commit_cred(&amp;init_cred) 或者 commit_creds(prepare_kernel(NULL))，当在内核中执行这样的代码，当前线程的 cred 结构体便会变为 init 进程的 cred 的拷贝，也就获得了 root 权限 关于 &amp;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-08-26T15:34:18.000Z">
-<meta property="article:modified_time" content="2025-08-28T17:39:10.848Z">
+<meta property="article:modified_time" content="2025-09-09T12:57:29.748Z">
 <meta property="article:author" content="yyyffff">
 <meta property="article:tag" content="kernel">
 <meta name="twitter:card" content="summary_large_image">
@@ -236,7 +236,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          708 字
+          749 字
         
       </span>
     
@@ -247,7 +247,7 @@
         
         
         
-          6 分钟
+          7 分钟
         
       </span>
     
@@ -332,7 +332,7 @@
 <p>可以看到开了 kaslr，顺便复习一下 kaslr</p>
 <h4 id="kaslr"><a href="#kaslr" class="headerlink" title="kaslr"></a>kaslr</h4><p>内核的地址随机化保护，会给内核加载地址加上随机偏移，但偏移量同一，所有函数，全局变量，gadget都是这个偏移</p>
 <p>所以我们需要先泄露出某个函数的真实地址，减去其未启用 kaslr 时的地址，就可以得到偏移</p>
-<h3 id="init"><a href="#init" class="headerlink" title="init"></a>init</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/sh</span><br>mount -t proc proc /proc<br>mount -t sysfs sysfs /sys<br>mount -t devtmpfs none /dev<br>/sbin/mdev -s<br><span class="hljs-built_in">mkdir</span> -p /dev/pts<br>mount -vt devpts -o gid=4,mode=620 none /dev/pts<br><span class="hljs-built_in">chmod</span> 666 /dev/ptmx<br><span class="hljs-built_in">cat</span> /proc/kallsyms &gt; /tmp/kallsyms<br><span class="hljs-built_in">echo</span> 1 &gt; /proc/sys/kernel/kptr_restrict<br><span class="hljs-built_in">echo</span> 1 &gt; /proc/sys/kernel/dmesg_restrict<br>ifconfig eth0 up<br>udhcpc -i eth0<br>ifconfig eth0 10.0.2.15 netmask 255.255.255.0<br>route add default gw 10.0.2.2 <br>insmod /core.ko<br><br>poweroff -d 120 -f &amp;<br>setsid /bin/cttyhack setuidgid 1000 /bin/sh<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;sh end!\n&#x27;</span><br>umount /proc<br>umount /sys<br><br>poweroff -d 0  -f<br></code></pre></td></tr></table></figure>
+<h3 id="init"><a href="#init" class="headerlink" title="init"></a>init</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-meta">#!/bin/sh</span><br>mount -t proc proc /proc<br>mount -t sysfs sysfs /sys<br>mount -t devtmpfs none /dev<br>/sbin/mdev -s<br><span class="hljs-built_in">mkdir</span> -p /dev/pts<br>mount -vt devpts -o gid=4,mode=620 none /dev/pts<br><span class="hljs-built_in">chmod</span> 666 /dev/ptmx<br><span class="hljs-built_in">cat</span> /proc/kallsyms &gt; /tmp/kallsyms<br><span class="hljs-built_in">echo</span> 1 &gt; /proc/sys/kernel/kptr_restrict <span class="hljs-comment"># kptr_restrict设为1，这样我们就不可以通过/proc/kallsyms直接读取函数的地址了</span><br><span class="hljs-built_in">echo</span> 1 &gt; /proc/sys/kernel/dmesg_restrict <span class="hljs-comment"># 该值设为1表示不可通过dmesg查看kernel信息了</span><br>ifconfig eth0 up<br>udhcpc -i eth0<br>ifconfig eth0 10.0.2.15 netmask 255.255.255.0<br>route add default gw 10.0.2.2 <br>insmod /core.ko<br><br>poweroff -d 120 -f &amp;<br>setsid /bin/cttyhack setuidgid 1000 /bin/sh<br><span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;sh end!\n&#x27;</span><br>umount /proc<br>umount /sys<br><br>poweroff -d 0  -f<br></code></pre></td></tr></table></figure>
 
 <p>第 9 行将符号表导出到 &#x2F;tmp&#x2F;kallsyms，这样普通用户也可以读到</p>
 <p>第 18 行表示 120 秒后强制关机，可以去掉，无影响</p>
