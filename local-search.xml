@@ -4,6 +4,19 @@
   
   
   <entry>
+    <title>pwn.college记录</title>
+    <link href="/2025/09/22/pwn.college%E8%AE%B0%E5%BD%95/"/>
+    <url>/2025/09/22/pwn.college%E8%AE%B0%E5%BD%95/</url>
+    
+    <content type="html"><![CDATA[<h1 id="linux-luminarium"><a href="#linux-luminarium" class="headerlink" title="linux-luminarium"></a>linux-luminarium</h1><h2 id="globbing（通配符）"><a href="#globbing（通配符）" class="headerlink" title="globbing（通配符）"></a>globbing（通配符）</h2><h3 id><a href="#" class="headerlink" title="*"></a>*</h3><p>shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">ls</span> <br>file_afile_bfile_c<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_* <span class="hljs-comment"># 这里会匹配任何以 file_开头的文件，这里有多个参数</span><br>Look: file_a file_b file_c<br></code></pre></td></tr></table></figure><p>当只有一个文件时也是可以匹配的</p><p>当 0 个文件时 shell 不会改变 * 这个参数</p><p>不能匹配 &#x2F; 或前导.</p><p>举个碰到过的例子，比如不允许 &#x2F;bin&#x2F;sh 那么我们就可以 &#x2F;bin&#x2F;*h ，它会自动匹配到 &#x2F;bin&#x2F;sh</p><h3 id="-1"><a href="#-1" class="headerlink" title="?"></a>?</h3><p>类似 * ，但是只匹配一个字符，比如</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">ls</span><br>file_afile_bfile_cc<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_? <span class="hljs-comment"># 匹配一个字符</span><br>Look: file_a file_b<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_?? <span class="hljs-comment"># 匹配两个</span><br>Look: file_cc<br></code></pre></td></tr></table></figure>]]></content>
+    
+    
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>ARM下pwn学习</title>
     <link href="/2025/09/18/ARM%E4%B8%8Bpwn%E5%AD%A6%E4%B9%A0/"/>
     <url>/2025/09/18/ARM%E4%B8%8Bpwn%E5%AD%A6%E4%B9%A0/</url>

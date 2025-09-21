@@ -19,22 +19,21 @@
   <meta name="author" content="yyyffff">
   <meta name="keywords" content="">
   
-    <meta name="description" content="汇编相关寄存器相关   寄存器名称 别名 作用    r0  通用寄存器   r1     r2     r3     r4     r5     r6     r7  存系统调用号   r8  通用寄存器   r9     r10     r11 FP 帧指针，类似EBP   r12 IP 程序内调用   r13 SP 栈指针   r14 LR 链接寄存器   r15 PC 程序计数器，类似EI">
+    <meta name="description" content="linux-luminariumglobbing（通配符）*shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如 1234hacker@dojo:~$ ls file_a	file_b	file_chacker@dojo:~$ echo Look: file_* # 这里会匹配任何以 file_开头的文件，这里有多个参数Look: file_a file_b file_">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ARM下pwn学习">
-<meta property="og:url" content="http://yyyffff.github.io/2025/09/18/ARM%E4%B8%8Bpwn%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:title" content="pwn.college记录">
+<meta property="og:url" content="http://yyyffff.github.io/2025/09/22/pwn.college%E8%AE%B0%E5%BD%95/index.html">
 <meta property="og:site_name" content="yyyffff">
-<meta property="og:description" content="汇编相关寄存器相关   寄存器名称 别名 作用    r0  通用寄存器   r1     r2     r3     r4     r5     r6     r7  存系统调用号   r8  通用寄存器   r9     r10     r11 FP 帧指针，类似EBP   r12 IP 程序内调用   r13 SP 栈指针   r14 LR 链接寄存器   r15 PC 程序计数器，类似EI">
+<meta property="og:description" content="linux-luminariumglobbing（通配符）*shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如 1234hacker@dojo:~$ ls file_a	file_b	file_chacker@dojo:~$ echo Look: file_* # 这里会匹配任何以 file_开头的文件，这里有多个参数Look: file_a file_b file_">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-09-18T13:00:00.000Z">
-<meta property="article:modified_time" content="2025-09-19T04:25:09.742Z">
+<meta property="article:published_time" content="2025-09-21T16:00:56.000Z">
+<meta property="article:modified_time" content="2025-09-21T16:16:24.314Z">
 <meta property="article:author" content="yyyffff">
-<meta property="article:tag" content="ARM">
 <meta name="twitter:card" content="summary_large_image">
   
   
   
-  <title>ARM下pwn学习 - yyyffff</title>
+  <title>pwn.college记录 - yyyffff</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -213,7 +212,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="ARM下pwn学习"></span>
+            <span id="subtitle" data-typed-text="pwn.college记录"></span>
           
         </div>
 
@@ -224,8 +223,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2025-09-18 21:00" pubdate>
-          2025年9月18日 晚上
+        <time datetime="2025-09-22 00:00" pubdate>
+          2025年9月22日 凌晨
         </time>
       </span>
     
@@ -236,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          225 字
+          173 字
         
       </span>
     
@@ -293,125 +292,21 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">ARM下pwn学习</h1>
+            <h1 id="seo-header">pwn.college记录</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="汇编相关"><a href="#汇编相关" class="headerlink" title="汇编相关"></a>汇编相关</h1><h2 id="寄存器相关"><a href="#寄存器相关" class="headerlink" title="寄存器相关"></a>寄存器相关</h2><table>
-<thead>
-<tr>
-<th align="center">寄存器名称</th>
-<th align="center">别名</th>
-<th align="center">作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="center">r0</td>
-<td align="center"></td>
-<td align="center">通用寄存器</td>
-</tr>
-<tr>
-<td align="center">r1</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r2</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r3</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r4</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r5</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r6</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r7</td>
-<td align="center"></td>
-<td align="center">存系统调用号</td>
-</tr>
-<tr>
-<td align="center">r8</td>
-<td align="center"></td>
-<td align="center">通用寄存器</td>
-</tr>
-<tr>
-<td align="center">r9</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r10</td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td align="center">r11</td>
-<td align="center">FP</td>
-<td align="center">帧指针，类似EBP</td>
-</tr>
-<tr>
-<td align="center">r12</td>
-<td align="center">IP</td>
-<td align="center">程序内调用</td>
-</tr>
-<tr>
-<td align="center">r13</td>
-<td align="center">SP</td>
-<td align="center">栈指针</td>
-</tr>
-<tr>
-<td align="center">r14</td>
-<td align="center">LR</td>
-<td align="center">链接寄存器</td>
-</tr>
-<tr>
-<td align="center">r15</td>
-<td align="center">PC</td>
-<td align="center">程序计数器，类似EIP</td>
-</tr>
-<tr>
-<td align="center">CPSR</td>
-<td align="center"></td>
-<td align="center">当前程序状态寄存器</td>
-</tr>
-<tr>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-</tbody></table>
-<h1 id="函数调用时参数"><a href="#函数调用时参数" class="headerlink" title="函数调用时参数"></a>函数调用时参数</h1><p>规定前4个参数，由寄存器 r0123 传，后几个参数放栈上</p>
-<h1 id="启动及调试"><a href="#启动及调试" class="headerlink" title="启动及调试"></a>启动及调试</h1><h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><p>32位</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">qemu-arm -L /usr/arm-linux-gnueabihf ./your_program <span class="hljs-comment"># 动态链接</span><br><span class="hljs-comment"># 若有给依赖，则将-L后的路径改为依赖的路径即可</span><br>qemu-arm ./your_program <span class="hljs-comment"># 静态</span><br></code></pre></td></tr></table></figure>
+                <h1 id="linux-luminarium"><a href="#linux-luminarium" class="headerlink" title="linux-luminarium"></a>linux-luminarium</h1><h2 id="globbing（通配符）"><a href="#globbing（通配符）" class="headerlink" title="globbing（通配符）"></a>globbing（通配符）</h2><h3 id><a href="#" class="headerlink" title="*"></a>*</h3><p>shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">ls</span> <br>file_a	file_b	file_c<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_* <span class="hljs-comment"># 这里会匹配任何以 file_开头的文件，这里有多个参数</span><br>Look: file_a file_b file_c<br></code></pre></td></tr></table></figure>
 
-<p>64位</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">qemu-aarch64 -L /usr/aarch64-linux-gnu ./your_program <span class="hljs-comment"># 动态链接</span><br><span class="hljs-comment"># 若有给依赖，则将-L后的路径改为依赖的路径即可</span><br>qemu-aarch64 ./your_program <span class="hljs-comment"># 静态</span><br></code></pre></td></tr></table></figure>
+<p>当只有一个文件时也是可以匹配的</p>
+<p>当 0 个文件时 shell 不会改变 * 这个参数</p>
+<p>不能匹配 &#x2F; 或前导.</p>
+<p>举个碰到过的例子，比如不允许 &#x2F;bin&#x2F;sh 那么我们就可以 &#x2F;bin&#x2F;*h ，它会自动匹配到 &#x2F;bin&#x2F;sh</p>
+<h3 id="-1"><a href="#-1" class="headerlink" title="?"></a>?</h3><p>类似 * ，但是只匹配一个字符，比如</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">ls</span><br>file_a	file_b	file_cc<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_? <span class="hljs-comment"># 匹配一个字符</span><br>Look: file_a file_b<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_?? <span class="hljs-comment"># 匹配两个</span><br>Look: file_cc<br></code></pre></td></tr></table></figure>
 
-<h2 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h2><p>启动时加上 -g 后加端口</p>
-<p>比如</p>
-<figure class="highlight armasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs armasm"><span class="hljs-symbol">qemu</span>-<span class="hljs-meta">arm</span> -g <span class="hljs-number">1234</span> -L /usr/<span class="hljs-meta">arm</span>-linux-gnueabihf ./your_program<br></code></pre></td></tr></table></figure>
-
-<p>然后启动 gdb</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">gdb-multiarch<br><span class="hljs-comment"># 进入gdb</span><br>target remote localhost:上文的端口号<br></code></pre></td></tr></table></figure>
-
-<p>然后就可以调试了</p>
 
                 
               </div>
@@ -421,13 +316,6 @@
               <div class="post-metas my-3">
   
   
-    <div class="post-meta">
-      <i class="iconfont icon-tags"></i>
-      
-        <a href="/tags/ARM/" class="print-no-link">#ARM</a>
-      
-    </div>
-  
 </div>
 
 
@@ -436,8 +324,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>ARM下pwn学习</div>
-      <div>http://yyyffff.github.io/2025/09/18/ARM下pwn学习/</div>
+      <div>pwn.college记录</div>
+      <div>http://yyyffff.github.io/2025/09/22/pwn.college记录/</div>
     </div>
     <div class="license-meta">
       
@@ -449,7 +337,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2025年9月18日</div>
+          <div>2025年9月22日</div>
         </div>
       
       
@@ -481,18 +369,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2025/09/22/pwn.college%E8%AE%B0%E5%BD%95/" title="pwn.college记录">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">pwn.college记录</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2025/09/17/2025%E6%B9%BE%E5%8C%BA%E6%9D%AF%E9%83%A8%E5%88%86pwn%E5%A4%8D%E7%8E%B0/" title="2025湾区杯部分pwn复现">
-                        <span class="hidden-mobile">2025湾区杯部分pwn复现</span>
+                      <a href="/2025/09/18/ARM%E4%B8%8Bpwn%E5%AD%A6%E4%B9%A0/" title="ARM下pwn学习">
+                        <span class="hidden-mobile">ARM下pwn学习</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
