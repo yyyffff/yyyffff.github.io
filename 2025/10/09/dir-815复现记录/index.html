@@ -19,15 +19,15 @@
   <meta name="author" content="yyyffff">
   <meta name="keywords" content="">
   
-    <meta name="description" content="binwalk源码安装进入github  Releases · ReFirmLabs&#x2F;binwalk  选择一个版本下载 Source Code.tar.gz 解压 1tar -xzvf binwalk-2.3.4.tar.gz  启动安装脚本 1sudo python3 setup.py install">
+    <meta name="description" content="IOT安全的入门经典——DIR-815漏洞复现-先知社区  binwalk源码安装进入github  Releases · ReFirmLabs&#x2F;binwalk  选择一个版本下载 Source Code.tar.gz 解压 1tar -xzvf binwalk-2.3.4.tar.gz  启动安装脚本 1sudo python3 setup.py install  http协议学习概">
 <meta property="og:type" content="article">
 <meta property="og:title" content="dir-815复现记录">
 <meta property="og:url" content="http://yyyffff.github.io/2025/10/09/dir-815%E5%A4%8D%E7%8E%B0%E8%AE%B0%E5%BD%95/index.html">
 <meta property="og:site_name" content="yyyffff&#39;s blog">
-<meta property="og:description" content="binwalk源码安装进入github  Releases · ReFirmLabs&#x2F;binwalk  选择一个版本下载 Source Code.tar.gz 解压 1tar -xzvf binwalk-2.3.4.tar.gz  启动安装脚本 1sudo python3 setup.py install">
+<meta property="og:description" content="IOT安全的入门经典——DIR-815漏洞复现-先知社区  binwalk源码安装进入github  Releases · ReFirmLabs&#x2F;binwalk  选择一个版本下载 Source Code.tar.gz 解压 1tar -xzvf binwalk-2.3.4.tar.gz  启动安装脚本 1sudo python3 setup.py install  http协议学习概">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2025-10-09T09:47:30.000Z">
-<meta property="article:modified_time" content="2025-10-09T09:51:40.695Z">
+<meta property="article:modified_time" content="2025-10-11T17:32:55.671Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
   
@@ -235,7 +235,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          35 字
+          580 字
         
       </span>
     
@@ -246,7 +246,7 @@
         
         
         
-          1 分钟
+          5 分钟
         
       </span>
     
@@ -297,7 +297,8 @@
             
               <div class="markdown-body">
                 
-                <h1 id="binwalk源码安装"><a href="#binwalk源码安装" class="headerlink" title="binwalk源码安装"></a>binwalk源码安装</h1><p>进入github</p>
+                <p> <a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/15836">IOT安全的入门经典——DIR-815漏洞复现-先知社区</a> </p>
+<h1 id="binwalk源码安装"><a href="#binwalk源码安装" class="headerlink" title="binwalk源码安装"></a>binwalk源码安装</h1><p>进入github</p>
 <p> <a target="_blank" rel="noopener" href="https://github.com/ReFirmLabs/binwalk/releases">Releases · ReFirmLabs&#x2F;binwalk</a> </p>
 <p>选择一个版本下载 Source Code.tar.gz</p>
 <p>解压</p>
@@ -306,6 +307,78 @@
 <p>启动安装脚本</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> python3 setup.py install<br></code></pre></td></tr></table></figure>
 
+<h1 id="http协议学习"><a href="#http协议学习" class="headerlink" title="http协议学习"></a>http协议学习</h1><h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>HTTP（HyperText Transfer Protocol）是一种超文本传输协议，是 web 进行数据交换的基础，是 客户端-服务器 协议</p>
+<p>由请求和响应构成，请求由 请求行，消息报头，请求正文构成</p>
+<h2 id="请求头"><a href="#请求头" class="headerlink" title="请求头"></a>请求头</h2><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs oxygene">&lt;<span class="hljs-keyword">Method</span>&gt; &lt;<span class="hljs-title function_">Request</span>-<span class="hljs-title function_">URI</span>&gt; <span class="hljs-title function_">HTTP</span>/&lt;<span class="hljs-title function_">major</span>&gt;.&lt;<span class="hljs-title function_">minor</span>&gt;\<span class="hljs-title function_">r</span>\<span class="hljs-title function_">n</span><br></code></pre></td></tr></table></figure>
+
+<p>method 表示客户端希望服务器对目标资源执行的操作（如读取，创建，删除等）</p>
+<p>常见 method</p>
+<ul>
+<li>GET：读取资源，可被缓存</li>
+<li>POST：向服务器提交数据</li>
+<li>PUT：用请求题替换目标资源</li>
+<li>DELETE：删除资源</li>
+<li>PATCH：对资源进行部分修改</li>
+<li>OPTIONS：查询服务器对资源所支持的方法</li>
+<li>TRACE：回显请求</li>
+</ul>
+<p>&lt;Request-URI&gt;-请求目标，表示请求的资源，常见形式：</p>
+<ol>
+<li>Absolute-URI（绝对 URI）</li>
+</ol>
+<ul>
+<li>例：<code>http://example.com/path?query=1</code></li>
+<li>在代理请求（forwarding）或某些代理场景常见。</li>
+</ul>
+<ol start="2">
+<li>absolute-path（绝对路径）</li>
+</ol>
+<ul>
+<li>例：<code>/index.html</code> 或 <code>/api/status?uptime=1</code></li>
+<li>这是浏览器或客户端向 origin 服务器常用的形式。</li>
+</ul>
+<ol start="3">
+<li>authority（主机:端口，仅在 CONNECT 请求中用）</li>
+</ol>
+<ul>
+<li>例：<code>example.com:443</code>（用于 <code>CONNECT</code>）。</li>
+</ul>
+<ol start="4">
+<li>asterisk-form</li>
+</ol>
+<ul>
+<li>例：<code>*</code>（用于 <code>OPTIONS * HTTP/1.1</code>，指整个服务器而非单一资源）</li>
+</ul>
+<p>HTTP&#x2F;&lt;major&gt;.&lt;minor&gt;\r\n-协议版本</p>
+<p>例如：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs http"><span class="hljs-keyword">GET</span> <span class="hljs-string">/index.html</span> <span class="hljs-meta">HTTP/1.1</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="消息报头"><a href="#消息报头" class="headerlink" title="消息报头"></a>消息报头</h2><p>key: value</p>
+<p>示例</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs makefile"><span class="hljs-section">Host: api.example.com</span><br><span class="hljs-section">User-Agent: curl/7.68.0</span><br><span class="hljs-section">Accept: application/json</span><br><span class="hljs-section">Content-Type: application/json</span><br><span class="hljs-section">Content-Length: 55</span><br><span class="hljs-section">Connection: keep-alive</span><br><span class="hljs-section">Cookie: session=abcd1234</span><br><span class="hljs-section">Authorization: Bearer &lt;token&gt;</span><br></code></pre></td></tr></table></figure>
+
+<ul>
+<li><p>Host 指明要访问的服务器主机名字</p>
+</li>
+<li><p>User-Agent 告诉服务器我是哪个客户端&#x2F;浏览器</p>
+</li>
+<li><p>Accept 希望收到数据的格式</p>
+</li>
+<li><p>Content-Type 我发过去的数据的格式</p>
+</li>
+<li><p>Content-Length 请求体长度（请求正文），只在需要传递数据时出现</p>
+</li>
+<li><p>Connection 是否保持TCP连接不关闭</p>
+</li>
+<li><p>Cookie 浏览器上次保存的 cookie，用于维持会话，比如登陆服务器返回  Set-Cookie: session&#x3D;abcd1234 ，下次请求自动携带 Cookie: session&#x3D;abcd1234 表明身份</p>
+</li>
+<li><p>Authorization 认证信息，验证我的身份是否合法（已登陆或有权限访问）</p>
+</li>
+</ul>
+<h2 id="请求正文"><a href="#请求正文" class="headerlink" title="请求正文"></a>请求正文</h2><ul>
+<li>可选，仅在需要传输数据时出现（POST&#x2F;PUT&#x2F;PATCH）</li>
+<li>格式由 Content-Type 决定，长度：Content-Length</li>
+</ul>
 
                 
               </div>

@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747661283748.png">
 <meta property="article:published_time" content="2025-05-12T15:36:30.000Z">
-<meta property="article:modified_time" content="2025-09-17T03:32:50.053Z">
+<meta property="article:modified_time" content="2025-10-13T15:23:43.621Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
@@ -238,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          949 字
+          1.3k 字
         
       </span>
     
@@ -249,7 +249,7 @@
         
         
         
-          8 分钟
+          11 分钟
         
       </span>
     
@@ -462,7 +462,34 @@
 <li>其他文件如 <code>/bin/bash</code>、<code>/bin/dash</code>、<code>/bin/cat</code> 等，但 <strong>不会以 <code>h</code> 结尾</strong>。</li>
 </ul>
 <p>因此，执行 <code>/bin/*h</code> 时，通配符会扩展为 <code>/bin/sh</code>。</p>
-<h1 id="python中简写sendline等"><a href="#python中简写sendline等" class="headerlink" title="python中简写sendline等"></a>python中简写sendline等</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">sla = <span class="hljs-keyword">lambda</span> a,b : r.sendlineafter(a,b)<br>sa  = <span class="hljs-keyword">lambda</span> a,b : r.sendafter(a,b)<br>ru  = lanbda a  :  r.recvuntil(a)<br><br></code></pre></td></tr></table></figure>
+<h1 id="python中简写sendline等"><a href="#python中简写sendline等" class="headerlink" title="python中简写sendline等"></a>python中简写sendline等</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">sla = <span class="hljs-keyword">lambda</span> a,b : r.sendlineafter(a,b)<br>sa  = <span class="hljs-keyword">lambda</span> a,b : r.sendafter(a,b)<br>ru  = <span class="hljs-keyword">lambda</span> a  :  r.recvuntil(a)<br></code></pre></td></tr></table></figure>
+
+<h1 id="关闭ASLR"><a href="#关闭ASLR" class="headerlink" title="关闭ASLR"></a>关闭ASLR</h1><p>为了方便调试，经常关闭ASLR</p>
+<p>指令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">cat</span> /proc/sys/kernel/randomize_va_space <span class="hljs-comment"># 查看ASLR情况 0 关2 FULL</span><br><span class="hljs-built_in">echo</span> 0 | <span class="hljs-built_in">sudo</span> <span class="hljs-built_in">tee</span> /proc/sys/kernel/randomize_va_space <span class="hljs-comment"># 关闭</span><br></code></pre></td></tr></table></figure>
+
+<h1 id="利用xinetd部署pwn题目"><a href="#利用xinetd部署pwn题目" class="headerlink" title="利用xinetd部署pwn题目"></a>利用xinetd部署pwn题目</h1><h2 id="xinetd"><a href="#xinetd" class="headerlink" title="xinetd"></a>xinetd</h2><p>一个开源项目</p>
+<p> <a target="_blank" rel="noopener" href="https://github.com/Eadom/ctf_xinetd">Eadom&#x2F;ctf_xinetd: A docker repository for deploying pwnable challenges in CTF</a> </p>
+<p>可以很方便的部署pwn题目</p>
+<h2 id="bin"><a href="#bin" class="headerlink" title="bin"></a>bin</h2><p>将里面的flag换成我们的flag，然后将里面的程序替换成我们的程序</p>
+<h2 id="ctf-xinetd"><a href="#ctf-xinetd" class="headerlink" title="ctf.xinetd"></a>ctf.xinetd</h2><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">service ctf<br>&#123;<br>    disable = no<br>    socket_type = stream<br>    protocol    = tcp<br>    wait        = no<br>    <span class="hljs-keyword">user</span>        = root<br>    type        = UNLISTED<br>    port        = <span class="hljs-number">80</span><br>    bind        = <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span><br>    server      = /usr/sbin/chroot<br>    <span class="hljs-comment"># replace helloworld to your program</span><br>    server_args = --userspec=<span class="hljs-number">1000</span>:<span class="hljs-number">1000</span> /home/ctf ./shellcode <span class="hljs-comment"># 这里替换成我们自己的程序</span><br>    banner_fail = /etc/banner_fail<br>    <span class="hljs-comment"># safety options</span><br>    per_source	= <span class="hljs-number">10</span> <span class="hljs-comment"># the maximum instances of this service per source IP address</span><br>    rlimit_cpu	= <span class="hljs-number">20</span> <span class="hljs-comment"># the maximum number of CPU seconds that the service may use</span><br>    <span class="hljs-comment">#rlimit_as  = 1024M # the Address Space resource limit for the service</span><br>    <span class="hljs-comment">#access_times = 2:00-9:00 12:00-24:00</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="Dockerfile"><a href="#Dockerfile" class="headerlink" title="Dockerfile"></a>Dockerfile</h2><figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile"><span class="hljs-keyword">FROM</span> ubuntu:<span class="hljs-number">22.04</span> <span class="hljs-comment"># 这里应该要写自己ubuntu版本</span><br><br><span class="hljs-keyword">RUN</span><span class="language-bash"> sed -i <span class="hljs-string">&quot;s/http:\/\/archive.ubuntu.com/http:\/\/mirrors.tuna.tsinghua.edu.cn/g&quot;</span> /etc/apt/sources.list &amp;&amp; \</span><br><span class="language-bash">    apt-get update &amp;&amp; apt-get -y dist-upgrade &amp;&amp; \</span><br><span class="language-bash">    apt-get install -y lib32z1 xinetd</span><br><br><span class="hljs-keyword">RUN</span><span class="language-bash"> useradd -m ctf</span><br><br><span class="hljs-keyword">WORKDIR</span><span class="language-bash"> /home/ctf</span><br><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">cp</span> -R /usr/lib* /home/ctf</span><br><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">mkdir</span> /home/ctf/dev &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">mknod</span> /home/ctf/dev/null c 1 3 &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">mknod</span> /home/ctf/dev/zero c 1 5 &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">mknod</span> /home/ctf/dev/random c 1 8 &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">mknod</span> /home/ctf/dev/urandom c 1 9 &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">chmod</span> 666 /home/ctf/dev/*</span><br><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">mkdir</span> /home/ctf/bin &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">cp</span> /bin/sh /home/ctf/bin &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">cp</span> /bin/ls /home/ctf/bin &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">cp</span> /bin/cat /home/ctf/bin</span><br><br><span class="hljs-keyword">COPY</span><span class="language-bash"> ./ctf.xinetd /etc/xinetd.d/ctf</span><br><span class="hljs-keyword">COPY</span><span class="language-bash"> ./start.sh /start.sh</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Blocked by ctf_xinetd&quot;</span> &gt; /etc/banner_fail</span><br><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">chmod</span> +x /start.sh</span><br><br><span class="hljs-keyword">COPY</span><span class="language-bash"> ./bin/ /home/ctf/</span><br><span class="hljs-keyword">RUN</span><span class="language-bash"> <span class="hljs-built_in">chown</span> -R root:ctf /home/ctf &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">chmod</span> -R 750 /home/ctf &amp;&amp; \</span><br><span class="language-bash">    <span class="hljs-built_in">chmod</span> 740 /home/ctf/flag</span><br><br><span class="hljs-keyword">CMD</span><span class="language-bash"> [<span class="hljs-string">&quot;/start.sh&quot;</span>]</span><br><br><span class="hljs-keyword">EXPOSE</span> <span class="hljs-number">80</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h2><ul>
+<li>制作镜像</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> docker build -t <span class="hljs-string">&quot;pwn&quot;</span> .<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>查看所有本地镜像</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> docker images<br></code></pre></td></tr></table></figure>
+
+<ul>
+<li>登陆远程仓库</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> docker login .....<br></code></pre></td></tr></table></figure>
 
 
                 
