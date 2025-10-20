@@ -32,7 +32,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/1760610760743.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/633730248.png">
 <meta property="article:published_time" content="2025-10-09T09:47:30.000Z">
-<meta property="article:modified_time" content="2025-10-17T10:25:25.607Z">
+<meta property="article:modified_time" content="2025-10-20T16:36:14.517Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/458022594.png">
@@ -241,7 +241,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2k 字
+          2.2k 字
         
       </span>
     
@@ -252,7 +252,7 @@
         
         
         
-          17 分钟
+          19 分钟
         
       </span>
     
@@ -428,7 +428,22 @@
 
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">v3 = getenv(<span class="hljs-string">&quot;HTTP_COOKIE&quot;</span>);<br></code></pre></td></tr></table></figure>
 
-<p>对 http 的 cookie 进行获取</p>
+<p>对 http 的 cookie 进行获取，接着用提取 &#x3D; 之前的字符并且存在 v2 里</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">else</span><br>&#123;<br>  v6 = <span class="hljs-number">2</span>;<br>  <span class="hljs-keyword">if</span> ( v7 != <span class="hljs-string">&#x27;=&#x27;</span> )<br>  &#123;<br>    sobj_add_char(v2, v7);<br>    v6 = <span class="hljs-number">1</span>;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>读取到 &#x3D; ，v6 就会保持2，从而进入下一个分支</p>
+<p>提取 &#x3D; 之后的字符串</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> ( v6 == <span class="hljs-number">2</span> )<br>&#123;<br>  <span class="hljs-keyword">if</span> ( v7 == <span class="hljs-string">&#x27;;&#x27;</span> )<br>  &#123;<br>    v6 = <span class="hljs-number">3</span>;<br>    <span class="hljs-keyword">goto</span> LABEL_18;<br>  &#125;<br>  sobj_add_char(v4, *v5++);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>存到 v4 里</p>
+<p>最后将 v2 和 uid 作比较，所以可以总结出，该函数作用就是提取 uid，如果没有拿到 cookie 就返回 ip 地址</p>
+<p>回到 hedwigcgi_main</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c">sess_get_uid(v4);                             <span class="hljs-comment">// v4中存着uid</span><br><span class="hljs-built_in">string</span> = (<span class="hljs-type">const</span> <span class="hljs-type">char</span> *)sobj_get_string(v4); <span class="hljs-comment">//将uid=后的字符串放在 string 里</span><br><span class="hljs-built_in">sprintf</span>(v27, <span class="hljs-string">&quot;%s/%s/postxml&quot;</span>, <span class="hljs-string">&quot;/runtime/session&quot;</span>, <span class="hljs-built_in">string</span>);<br></code></pre></td></tr></table></figure>
+
+<p>这里将 string 加入到 v27 里，而其大小为 1024 ，可能发生栈溢出</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">v20 = (<span class="hljs-type">const</span> <span class="hljs-type">char</span> *)sobj_get_string(v4);<br><span class="hljs-built_in">sprintf</span>(v27, <span class="hljs-string">&quot;/htdocs/webinc/fatlady.php\nprefix=%s/%s&quot;</span>, <span class="hljs-string">&quot;/runtime/session&quot;</span>, v20);<br></code></pre></td></tr></table></figure>
+
+<p>这里也有一个对 v27 写入的，但是由于写入的 v20 是 v4，也就是 uid&#x3D; 之后，而 v4 未改变，所以同样是 uid&#x3D; 后面的内容可以被我们当作 payload 利用</p>
 
                 
               </div>
