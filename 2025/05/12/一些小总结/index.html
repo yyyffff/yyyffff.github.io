@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747661283748.png">
 <meta property="article:published_time" content="2025-05-12T15:36:30.000Z">
-<meta property="article:modified_time" content="2025-10-13T15:23:43.621Z">
+<meta property="article:modified_time" content="2025-12-23T11:38:24.569Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
@@ -462,7 +462,7 @@
 <li>其他文件如 <code>/bin/bash</code>、<code>/bin/dash</code>、<code>/bin/cat</code> 等，但 <strong>不会以 <code>h</code> 结尾</strong>。</li>
 </ul>
 <p>因此，执行 <code>/bin/*h</code> 时，通配符会扩展为 <code>/bin/sh</code>。</p>
-<h1 id="python中简写sendline等"><a href="#python中简写sendline等" class="headerlink" title="python中简写sendline等"></a>python中简写sendline等</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">sla = <span class="hljs-keyword">lambda</span> a,b : r.sendlineafter(a,b)<br>sa  = <span class="hljs-keyword">lambda</span> a,b : r.sendafter(a,b)<br>ru  = <span class="hljs-keyword">lambda</span> a  :  r.recvuntil(a)<br></code></pre></td></tr></table></figure>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>path=<span class="hljs-string">&#x27;./example&#x27;</span><br>r=process(path)<br>elf=ELF(path)<br>libc=ELF(<span class="hljs-string">&#x27;./&#x27;</span>)<br><span class="hljs-comment"># r=remote(&quot;&quot;,)</span><br><br>sla = <span class="hljs-keyword">lambda</span> a,b : r.sendlineafter(a,b)<br>sa  = <span class="hljs-keyword">lambda</span> a,b : r.sendafter(a,b)<br>ru  = <span class="hljs-keyword">lambda</span> a  :  r.recvuntil(a)<br>rv = <span class="hljs-keyword">lambda</span> a : r.recv(a)<br>irt = <span class="hljs-keyword">lambda</span> : r.interactive()<br></code></pre></td></tr></table></figure>
 
 <h1 id="关闭ASLR"><a href="#关闭ASLR" class="headerlink" title="关闭ASLR"></a>关闭ASLR</h1><p>为了方便调试，经常关闭ASLR</p>
 <p>指令：</p>
