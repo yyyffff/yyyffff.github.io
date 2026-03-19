@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
 <meta property="og:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747661283748.png">
 <meta property="article:published_time" content="2025-05-12T15:36:30.000Z">
-<meta property="article:modified_time" content="2025-12-23T11:38:24.569Z">
+<meta property="article:modified_time" content="2026-03-08T07:08:58.402Z">
 <meta property="article:author" content="yyyffff">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="http://yyyffff.github.io/2025/05/12/%E4%B8%80%E4%BA%9B%E5%B0%8F%E6%80%BB%E7%BB%93/1747064315922.png">
@@ -238,7 +238,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          1.3k 字
+          1.5k 字
         
       </span>
     
@@ -249,7 +249,7 @@
         
         
         
-          11 分钟
+          13 分钟
         
       </span>
     
@@ -462,7 +462,7 @@
 <li>其他文件如 <code>/bin/bash</code>、<code>/bin/dash</code>、<code>/bin/cat</code> 等，但 <strong>不会以 <code>h</code> 结尾</strong>。</li>
 </ul>
 <p>因此，执行 <code>/bin/*h</code> 时，通配符会扩展为 <code>/bin/sh</code>。</p>
-<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>path=<span class="hljs-string">&#x27;./example&#x27;</span><br>r=process(path)<br>elf=ELF(path)<br>libc=ELF(<span class="hljs-string">&#x27;./&#x27;</span>)<br><span class="hljs-comment"># r=remote(&quot;&quot;,)</span><br><br>sla = <span class="hljs-keyword">lambda</span> a,b : r.sendlineafter(a,b)<br>sa  = <span class="hljs-keyword">lambda</span> a,b : r.sendafter(a,b)<br>ru  = <span class="hljs-keyword">lambda</span> a  :  r.recvuntil(a)<br>rv = <span class="hljs-keyword">lambda</span> a : r.recv(a)<br>irt = <span class="hljs-keyword">lambda</span> : r.interactive()<br></code></pre></td></tr></table></figure>
+<h1 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pwn <span class="hljs-keyword">import</span> *<br>context.terminal = [<span class="hljs-string">&#x27;tmux&#x27;</span>, <span class="hljs-string">&#x27;splitw&#x27;</span>, <span class="hljs-string">&#x27;-h&#x27;</span>]<br>context(arch = <span class="hljs-string">&#x27;amd64&#x27;</span>, os = <span class="hljs-string">&#x27;linux&#x27;</span>)<br><span class="hljs-comment">#context(arch = &#x27;i386&#x27;, os = &#x27;linux&#x27;)</span><br>context.log_level = <span class="hljs-string">&#x27;debug&#x27;</span><br><br><span class="hljs-comment">#r = process(&quot;./pwn1&quot;)</span><br>r = remote(<span class="hljs-string">&quot;node4.anna.nssctf.cn&quot;</span>, <span class="hljs-number">22956</span>)<br>elf = ELF(<span class="hljs-string">&quot;./pwn1&quot;</span>)<br>libc = elf.libc<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">debug</span>():<br>        gdb.attach(r)<br>        pause()<br><br>sd     = <span class="hljs-keyword">lambda</span> s    : r.send(s)<br>sda    = <span class="hljs-keyword">lambda</span> s, n : r.sendafter(s, n)<br>sl     = <span class="hljs-keyword">lambda</span> s    : r.sendline(s)<br>sla    = <span class="hljs-keyword">lambda</span> s, n : r.sendlineafter(s, n)<br>rc     = <span class="hljs-keyword">lambda</span> n    : r.recv(n)<br>ru    = <span class="hljs-keyword">lambda</span> s    : r.recvuntil(s)<br>addr   = <span class="hljs-keyword">lambda</span> n    : u64(r.recv(n).ljust(<span class="hljs-number">8</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>addr32 = <span class="hljs-keyword">lambda</span> s    : u32(r.recvuntil(s, drop=<span class="hljs-literal">True</span>, timeout=<span class="hljs-number">1</span>).ljust(<span class="hljs-number">4</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>addr64 = <span class="hljs-keyword">lambda</span> s    : u64(r.recvuntil(s, drop=<span class="hljs-literal">True</span>, timeout=<span class="hljs-number">1</span>).ljust(<span class="hljs-number">8</span>, <span class="hljs-string">b&#x27;\x00&#x27;</span>))<br>byte   = <span class="hljs-keyword">lambda</span> n    : <span class="hljs-built_in">str</span>(n).encode()<br>info   = <span class="hljs-keyword">lambda</span> s, n : <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;\033[31m[&quot;</span>+s+<span class="hljs-string">&quot;-&gt;&quot;</span>+<span class="hljs-built_in">str</span>(<span class="hljs-built_in">hex</span>(n))+<span class="hljs-string">&quot;]\033[0m&quot;</span>)<br>irt     = <span class="hljs-keyword">lambda</span>      : r.interactive()<br></code></pre></td></tr></table></figure>
 
 <h1 id="关闭ASLR"><a href="#关闭ASLR" class="headerlink" title="关闭ASLR"></a>关闭ASLR</h1><p>为了方便调试，经常关闭ASLR</p>
 <p>指令：</p>
@@ -490,6 +490,9 @@
 <li>登陆远程仓库</li>
 </ul>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-built_in">sudo</span> docker login .....<br></code></pre></td></tr></table></figure>
+
+<h1 id="随机数绕过"><a href="#随机数绕过" class="headerlink" title="随机数绕过"></a>随机数绕过</h1><p>比如以 time 为种子，利用 ctypes 调用随机数函数来绕过</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">libc=CDLL(<span class="hljs-string">&#x27;/home/yyyffff/glibc-all-in-one/libs/2.23-0ubuntu11.3_amd64/libc-2.23.so&#x27;</span>) seed=libc.time(<span class="hljs-number">0</span>) <br>libc.srand(seed) <br>random_num=libc.rand()%<span class="hljs-number">50</span><br></code></pre></td></tr></table></figure>
 
 
                 
